@@ -13,14 +13,12 @@ export function BootSequence() {
   const reducedMotion = useReducedMotion()
 
   useEffect(() => {
-    if (reducedMotion) {
-      skip()
-      return
-    }
-    if (phase === 'idle') {
-      setPhase('bios')
-    }
-  }, [phase, setPhase, skip, reducedMotion])
+    if (reducedMotion) skip()
+  }, [reducedMotion, skip])
+
+  useEffect(() => {
+    setPhase('bios')
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleBiosComplete = useCallback(() => setPhase('progress'), [setPhase])
   const handleProgressComplete = useCallback(() => setPhase('logo'), [setPhase])

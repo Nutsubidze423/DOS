@@ -1,15 +1,20 @@
 'use client'
 
+import { useEffect } from 'react'
 import { motion } from 'framer-motion'
 
 export function Win98Logo({ onComplete }: { onComplete: () => void }) {
+  useEffect(() => {
+    const t = setTimeout(onComplete, 900)
+    return () => clearTimeout(t)
+  }, [onComplete])
+
   return (
     <motion.div
       className="w-full h-full bg-black flex flex-col items-center justify-center gap-6"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
-      onAnimationComplete={onComplete}
     >
       <div className="grid grid-cols-2 gap-[3px] w-[72px] h-[72px]">
         <div className="bg-red-600 rounded-tl-[3px]" />
