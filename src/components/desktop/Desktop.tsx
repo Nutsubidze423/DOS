@@ -6,6 +6,7 @@ import { DesktopWallpaper } from './DesktopWallpaper'
 import { CRTOverlay } from './CRTOverlay'
 import { DesktopIcon, DESKTOP_ICONS } from './DesktopIcon'
 import { ContextMenu } from './ContextMenu'
+import { WindowManager } from '@/components/windows/WindowManager'
 
 export function Desktop() {
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null)
@@ -36,7 +37,8 @@ export function Desktop() {
         ))}
       </div>
 
-      {/* Context menu */}
+      <WindowManager />
+
       {contextMenu && (
         <ContextMenu
           x={contextMenu.x}
