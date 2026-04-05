@@ -34,14 +34,12 @@ const TICK_MS = 18
 
 export function AboutMe() {
   const [displayed, setDisplayed] = useState('')
-  const [done, setDone] = useState(false)
   const reducedMotion = useReducedMotion()
   const indexRef = useRef(0)
 
   useEffect(() => {
     if (reducedMotion) {
       setDisplayed(BIO_TEXT)
-      setDone(true)
       return
     }
 
@@ -50,7 +48,6 @@ export function AboutMe() {
       setDisplayed(BIO_TEXT.slice(0, indexRef.current))
       if (indexRef.current >= BIO_TEXT.length) {
         clearInterval(interval)
-        setDone(true)
       }
     }, TICK_MS)
 

@@ -4,6 +4,7 @@ import { useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useBootStore } from '@/store/bootStore'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
+import { useSoundEffect } from '@/hooks/useSoundEffect'
 import { BiosScreen } from './BiosScreen'
 import { Win98ProgressBar } from './Win98ProgressBar'
 import { Win98Logo } from './Win98Logo'
@@ -11,6 +12,7 @@ import { Win98Logo } from './Win98Logo'
 export function BootSequence() {
   const { phase, setPhase, skip } = useBootStore()
   const reducedMotion = useReducedMotion()
+  const { play } = useSoundEffect()
 
   useEffect(() => {
     if (reducedMotion) skip()
@@ -22,7 +24,10 @@ export function BootSequence() {
 
   const handleBiosComplete = useCallback(() => setPhase('progress'), [setPhase])
   const handleProgressComplete = useCallback(() => setPhase('logo'), [setPhase])
-  const handleLogoComplete = useCallback(() => setPhase('done'), [setPhase])
+  const handleLogoComplete = useCallback(() => {
+    play('startup')
+    setPhase('done')
+  }, [setPhase, play])
 
   if (phase === 'done') return null
 

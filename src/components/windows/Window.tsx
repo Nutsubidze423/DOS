@@ -1,9 +1,10 @@
 'use client'
 
-import { useCallback, lazy, Suspense } from 'react'
+import { useCallback, lazy, Suspense, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useWindowStore } from '@/store/windowStore'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
+import { useSoundEffect } from '@/hooks/useSoundEffect'
 import { TitleBar } from './TitleBar'
 import { ResizeHandle } from './ResizeHandle'
 import { AppId } from '@/types'
@@ -33,7 +34,14 @@ const TASKBAR_HEIGHT = 40
 export function Window({ id }: WindowProps) {
   const { windows, focusWindow } = useWindowStore()
   const reducedMotion = useReducedMotion()
+  const { play } = useSoundEffect()
   const win = windows[id]
+
+  // Play open sound on mount
+  useEffect(() => {
+    play('window-open')
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const activeWindowId = Object.values(windows).reduce<string | null>(
     (topId, w) => (!topId || w.zIndex > (windows[topId]?.zIndex ?? 0) ? w.id : topId),
@@ -62,7 +70,7 @@ export function Window({ id }: WindowProps) {
   }
 
   return (
-    <AnimatePresence>
+    <AnimatePresence onExitComplete={() => play('window-close')}>
       {!win.isMinimized && (
         <motion.div
           key={id}
