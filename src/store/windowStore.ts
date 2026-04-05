@@ -70,7 +70,8 @@ export const useWindowStore = create<WindowStoreState>((set, get) => ({
 
   closeWindow: (id) => {
     set((state) => {
-      const { [id]: _, ...rest } = state.windows
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { [id]: _removed, ...rest } = state.windows
       return { windows: rest }
     })
   },
