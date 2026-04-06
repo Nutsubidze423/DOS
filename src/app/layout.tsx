@@ -17,8 +17,20 @@ const shareTechMono = Share_Tech_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'Demetre Nutsubidze — Portfolio',
-  description: 'Front End Developer Portfolio',
+  title: 'Demetre Nutsubidze — Front End Developer',
+  description: 'Front End Developer from Tbilisi. React, Next.js, TypeScript, Angular. Portfolio built as a Windows 98 OS simulation — open apps, play games, chat with AI.',
+  openGraph: {
+    title: 'Demetre Nutsubidze — PortfolioOS',
+    description: 'A Windows 98-style OS portfolio. Open real apps, play Minesweeper, chat with AI, see live visitor cursors.',
+    url: 'https://dos-snowy.vercel.app',
+    siteName: 'PortfolioOS',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Demetre Nutsubidze — PortfolioOS',
+    description: 'A Windows 98-style OS portfolio. Open real apps, play Minesweeper, chat with AI, see live visitor cursors.',
+  },
 }
 
 export default function RootLayout({

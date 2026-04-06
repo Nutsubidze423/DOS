@@ -17,17 +17,40 @@ Frontend: React (90%), Next.js (88%), Angular (80%), Framer Motion (85%), Three.
 Languages: TypeScript (88%), JavaScript (92%), HTML (95%), CSS (90%)
 Tools: Git (85%), VS Code (95%), npm (88%)
 
-== THIS PORTFOLIO ==
-This portfolio itself is one of Demetre's best demonstrations of skill:
-- Built a fully functional Windows 98-style OS simulation in the browser
-- Features: multi-window management with drag/resize/snap, boot sequence animation, system tray with working clock/battery/wifi/volume, Solitaire, Minesweeper, MS Paint, Defrag simulator, Music Player (real MP3s), Solitaire, Control Panel with wallpaper themes, CRT scanline effect, screensaver, and more
-- Stack: Next.js 14, TypeScript, Tailwind CSS, Framer Motion, Zustand, Web Audio API, Canvas API
-- Deployed on Vercel
+== PROJECTS ==
+
+1. PortfolioOS (this site) — https://dos-snowy.vercel.app / github.com/Nutsubidze423/DOS
+   A fully functional Windows 98-style OS simulation in the browser. Multi-window drag/resize/snap, boot sequence, system tray, Minesweeper, Solitaire, MS Paint, Defrag simulator, Spotify-style music player with real MP3s, AI chat, real-time multiplayer cursors via Pusher, wallpaper themes, CRT overlay, screensaver.
+   Stack: Next.js 14, TypeScript, Tailwind CSS, Framer Motion, Zustand, Gemini AI, Pusher, Canvas API
+
+2. Dn.Com — https://nutsubidze423.github.io/Dn.Com/ / github.com/Nutsubidze423/Dn.Com
+   Modern minimalist personal portfolio with black/white/gold color scheme, magnetic animated cursor, scroll-reveal animations, and fully responsive layout.
+   Stack: React 19, Vite, Framer Motion, Tailwind CSS
+
+3. Redseem Clothing — https://voluble-douhua-67fd8e.netlify.app/shop.html / github.com/Nutsubidze423/Redseem-Clothing
+   Multi-page e-commerce clothing shop with product listings, cart, and checkout. Built in vanilla JS for RedBerry.
+   Stack: HTML, CSS, JavaScript
+
+4. Space Tourism — https://spacetourism-gules.vercel.app/ / github.com/Nutsubidze423/Space-Tourism
+   Concept space tourism site with destinations, crew, and technology sections. Rich visuals with Angular routing.
+   Stack: Angular 21, TypeScript, Vitest
+
+== EXPERIENCE ==
+- IT Support Specialist, TeraBank — Feb 2026 – Present (Tbilisi, Georgia)
+  Providing technical support and troubleshooting for banking systems and staff. Hardware, software, and network issue resolution in a financial environment.
+
+== EDUCATION ==
+- ITVET — Diploma, Web Technologies / Front-End Developer — Nov 2024 – Dec 2025
+  HTML, CSS, Bootstrap, JavaScript, Angular, WordPress/PHP
+- ITVET — Diploma, Information Technology (Grade: A) — Nov 2023 – Nov 2024
+  Networking, programming fundamentals, cybersecurity, database management, IT support. CISCO IT Essentials certificate.
+- 186 Public School — High School Diploma — Sep 2012 – Jun 2024
 
 == PERSONALITY & APPROACH ==
 - Attention to detail — built pixel-perfect retro UI from scratch
 - Creative problem solver — unique portfolio concept shows initiative
 - Full ownership — this entire OS was built solo
+- Based in Tbilisi, Georgia
 
 == INSTRUCTIONS ==
 - Answer questions about Demetre's skills, experience, projects, and availability
