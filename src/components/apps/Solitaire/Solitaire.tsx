@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, type CSSProperties } from 'react'
 
 type Suit = '♠' | '♥' | '♦' | '♣'
 interface Card { suit: Suit; value: number; faceUp: boolean; id: string }
@@ -56,15 +56,16 @@ type State = ReturnType<typeof deal>
 
 const CARD_W = 54, CARD_H = 76, STACK_OFFSET_DOWN = 18, STACK_OFFSET_UP = 28
 
-const CardBack = ({ style }: { style?: React.CSSProperties }) => (
+const CardBack = ({ style }: { style?: CSSProperties }) => (
   <div style={{ width: CARD_W, height: CARD_H, background: 'linear-gradient(135deg,#000080 0%,#0000aa 100%)', border: '2px solid #555', borderRadius: 3, flexShrink: 0, ...style }} />
 )
 
-const CardFace = ({ card, selected, onClick, style }: { card: Card; selected?: boolean; onClick?: () => void; style?: React.CSSProperties }) => {
+const CardFace = ({ card, selected, onClick, onDoubleClick, style }: { card: Card; selected?: boolean; onClick?: () => void; onDoubleClick?: () => void; style?: CSSProperties }) => {
   const red = isRed(card.suit)
   return (
     <div
       onClick={onClick}
+      onDoubleClick={onDoubleClick}
       style={{
         width: CARD_W, height: CARD_H,
         background: selected ? '#ddf' : 'white',
@@ -121,31 +122,9 @@ export function Solitaire() {
     setSel(null)
   }, [])
 
-  const clickWaste = useCallback(() => {
-    setState(s => {
-      if (s.waste.length === 0) return s
-      return s
-    })
-    setState(s => {
-      if (s.waste.length === 0) return s
-      if (sel?.from === 'waste') { setSel(null); return s }
-      setSel({ from: 'waste', pileIdx: 0, cardIdx: s.waste.length - 1 })
-      return s
-    })
-    setSel(prev => {
-      setState(s => {
-        if (s.waste.length === 0) return s
-        if (prev?.from === 'waste') return s
-        return s
-      })
-      return prev?.from === 'waste' ? null : null
-    })
-  }, [sel])
-
   const handleWasteClick = useCallback(() => {
     setState(s => {
       if (s.waste.length === 0) return s
-      const card = s.waste[s.waste.length - 1]
       if (sel === null) {
         setSel({ from: 'waste', pileIdx: 0, cardIdx: s.waste.length - 1 })
         return s
