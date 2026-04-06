@@ -11,7 +11,7 @@ export default function Home() {
 
   return (
     <MobileGate>
-      <main className="w-full h-full overflow-hidden">
+      <main className="fixed inset-0 overflow-hidden">
         {phase === 'off' && <PowerOn />}
         {phase !== 'off' && phase !== 'done' && <BootSequence />}
         {phase === 'done' && <Desktop />}

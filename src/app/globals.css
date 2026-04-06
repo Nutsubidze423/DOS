@@ -86,8 +86,9 @@ html, body {
   );
 }
 
-/* ── Kill root-level scrollbar gutter (the actual cause of right-side clipping) ── */
-html::-webkit-scrollbar { display: none; width: 0; height: 0; }
+/* ── Kill root-level scrollbar gutter (cause of right-side clipping) ── */
+html::-webkit-scrollbar,
+body::-webkit-scrollbar { display: none; width: 0; height: 0; }
 
 /* ── Scrollbar styling for inner scrollable elements ── */
 ::-webkit-scrollbar {
