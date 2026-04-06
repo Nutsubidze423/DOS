@@ -59,7 +59,7 @@ export const WINDOW_CONFIGS: Record<AppId, WindowDefaults> = {
     position: { x: 175, y: 75 },
   },
   'music-player': {
-    title: 'Winamp — PortfolioOS Audio',
+    title: 'Spotify — Desktop Player',
     size: { width: 325, height: 475 },
     position: { x: 300, y: 100 },
   },

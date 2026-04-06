@@ -2,226 +2,230 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react'
 
-interface Track { title: string; artist: string; notes: number[][]; bpm: number; wave: OscillatorType }
+interface Track { title: string; artist: string; src: string; hue: number }
 
 const TRACKS: Track[] = [
-  {
-    title: 'Win98 Startup Theme',
-    artist: 'PortfolioOS Audio',
-    bpm: 120,
-    wave: 'square',
-    notes: [
-      [261, 0.15], [329, 0.15], [392, 0.15], [523, 0.3],
-      [0, 0.1],
-      [392, 0.15], [440, 0.15], [523, 0.3],
-      [0, 0.1],
-      [523, 0.15], [587, 0.15], [659, 0.3], [784, 0.5],
-    ],
-  },
-  {
-    title: 'Lo-Fi Teal Vibes',
-    artist: 'PortfolioOS Audio',
-    bpm: 80,
-    wave: 'sine',
-    notes: [
-      [220, 0.4], [246, 0.4], [261, 0.4], [293, 0.4],
-      [329, 0.4], [293, 0.4], [261, 0.4], [246, 0.4],
-      [220, 0.4], [196, 0.4], [220, 0.4], [246, 0.4],
-      [261, 0.8],
-    ],
-  },
-  {
-    title: 'Boot Sequence',
-    artist: 'PortfolioOS Audio',
-    bpm: 160,
-    wave: 'sawtooth',
-    notes: [
-      [130, 0.1], [164, 0.1], [196, 0.1], [261, 0.1],
-      [329, 0.1], [392, 0.1], [523, 0.2],
-      [0, 0.1],
-      [392, 0.1], [523, 0.1], [659, 0.1], [784, 0.3],
-      [0, 0.2],
-    ],
-  },
+  { title: 'Brasilian Skies',      artist: 'Unknown',            src: '/music/brasilian-skies.mp3',      hue: 145 },
+  { title: 'Parisienne Walkways',  artist: 'Gary Moore',         src: '/music/parisienne-walkways.mp3',  hue: 210 },
+  { title: 'Kiss the Sky',         artist: 'Unknown',            src: '/music/kiss-the-sky.mp3',         hue: 270 },
+  { title: 'Oh! Tengo Suerte',     artist: 'Unknown',            src: '/music/oh-tengo-suerte.mp3',      hue: 40  },
+  { title: 'Far From Any Road',    artist: 'The Handsome Family',src: '/music/far-from-any-road.mp3',    hue: 0   },
+  { title: 'Tokyo Reggie',         artist: 'Unknown',            src: '/music/tokyo-reggie.mp3',         hue: 175 },
 ]
 
+const fmt = (s: number) =>
+  `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(Math.floor(s % 60)).padStart(2, '0')}`
+
 export function MusicPlayer() {
-  const [trackIdx, setTrackIdx] = useState(0)
+  const [idx, setIdx]         = useState(0)
   const [playing, setPlaying] = useState(false)
-  const [volume, setVolume] = useState(0.4)
-  const [elapsed, setElapsed] = useState(0)
-  const ctxRef = useRef<AudioContext | null>(null)
-  const stopRef = useRef<(() => void) | null>(null)
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
-  const track = TRACKS[trackIdx]
+  const [current, setCurrent] = useState(0)
+  const [duration, setDuration] = useState(0)
+  const [volume, setVolume]   = useState(0.7)
+  const [shuffle, setShuffle] = useState(false)
+  const [repeat, setRepeat]   = useState(false)
+  const audioRef = useRef<HTMLAudioElement | null>(null)
+  const track = TRACKS[idx]
 
-  const stopPlayback = useCallback(() => {
-    stopRef.current?.()
-    stopRef.current = null
-    if (intervalRef.current) clearInterval(intervalRef.current)
-    setPlaying(false)
-  }, [])
+  // Boot audio element
+  useEffect(() => {
+    const audio = new Audio()
+    audio.volume = volume
+    audio.src = TRACKS[0].src
+    audioRef.current = audio
 
-  const playTrack = useCallback((idx: number, vol: number) => {
-    stopPlayback()
-    if (!ctxRef.current) ctxRef.current = new AudioContext()
-    const ctx = ctxRef.current
-    if (ctx.state === 'suspended') ctx.resume()
-
-    const trk = TRACKS[idx]
-    let cancelled = false
-    let startTime = ctx.currentTime
-    setElapsed(0)
-
-    const playOnce = () => {
-      if (cancelled) return
-      let t = startTime
-      const gains: GainNode[] = []
-
-      for (const [freq, dur] of trk.notes) {
-        if (freq === 0) { t += dur; continue }
-        const osc = ctx.createOscillator()
-        const gain = ctx.createGain()
-        osc.type = trk.wave
-        osc.frequency.value = freq
-        gain.gain.setValueAtTime(vol * 0.3, t)
-        gain.gain.exponentialRampToValueAtTime(0.0001, t + dur * 0.9)
-        osc.connect(gain)
-        gain.connect(ctx.destination)
-        osc.start(t)
-        osc.stop(t + dur)
-        gains.push(gain)
-        t += dur
-      }
-
-      startTime = t
-      const loopTimeout = setTimeout(() => { if (!cancelled) playOnce() }, (t - ctx.currentTime) * 1000)
-      stopRef.current = () => { cancelled = true; clearTimeout(loopTimeout) }
+    const onTime  = () => setCurrent(audio.currentTime)
+    const onMeta  = () => setDuration(audio.duration || 0)
+    const onEnded = () => {
+      if (repeat) { audio.currentTime = 0; audio.play(); return }
+      const next = shuffle
+        ? Math.floor(Math.random() * TRACKS.length)
+        : (idx + 1) % TRACKS.length
+      setIdx(next)
     }
 
-    playOnce()
-    setPlaying(true)
-    if (intervalRef.current) clearInterval(intervalRef.current)
-    const startReal = Date.now()
-    intervalRef.current = setInterval(() => setElapsed(Date.now() - startReal), 500)
-  }, [stopPlayback])
+    audio.addEventListener('timeupdate', onTime)
+    audio.addEventListener('loadedmetadata', onMeta)
+    audio.addEventListener('ended', onEnded)
 
-  const handlePlayPause = useCallback(() => {
-    if (playing) { stopPlayback() } else { playTrack(trackIdx, volume) }
-  }, [playing, trackIdx, volume, playTrack, stopPlayback])
+    return () => {
+      audio.pause()
+      audio.removeEventListener('timeupdate', onTime)
+      audio.removeEventListener('loadedmetadata', onMeta)
+      audio.removeEventListener('ended', onEnded)
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
-  const handleTrack = useCallback((delta: number) => {
-    const next = (trackIdx + delta + TRACKS.length) % TRACKS.length
-    setTrackIdx(next)
-    if (playing) playTrack(next, volume)
-    else setElapsed(0)
-  }, [trackIdx, playing, volume, playTrack])
+  // Track change
+  useEffect(() => {
+    const audio = audioRef.current
+    if (!audio) return
+    audio.src = TRACKS[idx].src
+    setCurrent(0)
+    setDuration(0)
+    if (playing) audio.play()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [idx])
 
-  const handleVolume = useCallback((val: number) => {
-    setVolume(val)
-    if (playing) { stopPlayback(); setTimeout(() => playTrack(trackIdx, val), 50) }
-  }, [playing, trackIdx, stopPlayback, playTrack])
+  // Sync repeat/shuffle refs (used inside the ended handler — re-register it when they change)
+  useEffect(() => {
+    const audio = audioRef.current
+    if (!audio) return
+    const onEnded = () => {
+      if (repeat) { audio.currentTime = 0; audio.play(); return }
+      const next = shuffle
+        ? Math.floor(Math.random() * TRACKS.length)
+        : (idx + 1) % TRACKS.length
+      setIdx(next)
+    }
+    audio.addEventListener('ended', onEnded)
+    return () => audio.removeEventListener('ended', onEnded)
+  }, [idx, repeat, shuffle])
 
-  useEffect(() => () => stopPlayback(), [stopPlayback])
+  const togglePlay = useCallback(() => {
+    const audio = audioRef.current
+    if (!audio) return
+    if (playing) { audio.pause(); setPlaying(false) }
+    else         { audio.play().then(() => setPlaying(true)).catch(() => {}) }
+  }, [playing])
 
-  const fmt = (ms: number) => {
-    const s = Math.floor(ms / 1000)
-    return `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`
-  }
+  const seek = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const audio = audioRef.current
+    if (!audio) return
+    audio.currentTime = Number(e.target.value)
+    setCurrent(audio.currentTime)
+  }, [])
+
+  const changeVolume = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const v = Number(e.target.value)
+    setVolume(v)
+    if (audioRef.current) audioRef.current.volume = v
+  }, [])
+
+  const prev = useCallback(() => setIdx(i => (i - 1 + TRACKS.length) % TRACKS.length), [])
+  const next = useCallback(() => setIdx(i => (i + 1) % TRACKS.length), [])
+
+  const hue = track.hue
 
   return (
-    <div className="flex flex-col h-full select-none" style={{ background: '#1a1a1a' }}>
-      {/* Title bar area */}
-      <div className="px-3 pt-3 pb-2" style={{ background: '#000', borderBottom: '1px solid #333' }}>
-        <div className="font-terminal text-[10px] text-[#00ff88] mb-1">PORTFOLIOOS WINAMP 2.91</div>
-        <div className="font-terminal text-[13px] text-[#ffff00] truncate">{track.title}</div>
-        <div className="font-terminal text-[11px] text-[#00ff88] opacity-70">{track.artist}</div>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: '#121212', color: '#fff', fontFamily: 'sans-serif', overflow: 'hidden' }}>
+
+      {/* Header */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 14px 8px', borderBottom: '1px solid #282828' }}>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="#1DB954">
+          <path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm4.586 14.424a.622.622 0 01-.857.207c-2.348-1.435-5.304-1.76-8.785-.964a.623.623 0 01-.277-1.215c3.809-.87 7.077-.496 9.712 1.115a.624.624 0 01.207.857zm1.223-2.722a.78.78 0 01-1.072.257c-2.687-1.652-6.785-2.131-9.965-1.166a.78.78 0 01-.973-.519.781.781 0 01.52-.972c3.632-1.102 8.147-.568 11.233 1.328a.78.78 0 01.257 1.072zm.105-2.835c-3.223-1.914-8.54-2.09-11.618-1.156a.935.935 0 11-.543-1.79c3.532-1.072 9.404-.865 13.115 1.338a.935.935 0 01-.954 1.608z"/>
+        </svg>
+        <span style={{ fontSize: 13, fontWeight: 700, letterSpacing: '0.05em', color: '#fff' }}>Spotify</span>
+        <span style={{ fontSize: 10, color: '#b3b3b3', marginLeft: 2 }}>Desktop · 2009</span>
       </div>
 
-      {/* Visualizer bars */}
-      <div className="flex items-end gap-[2px] px-3 py-2 h-[48px]" style={{ background: '#000' }}>
-        {Array.from({ length: 28 }, (_, i) => {
-          const h = playing ? Math.random() * 36 + 4 : 4
-          return (
-            <div
-              key={i}
-              className="flex-1"
-              style={{
-                height: playing ? h : 4,
-                background: i < 10 ? '#00ff88' : i < 20 ? '#ffcc00' : '#ff4400',
-                transition: 'height 0.1s ease',
-                minWidth: 2,
-              }}
-            />
-          )
-        })}
+      {/* Album art */}
+      <div style={{ position: 'relative', margin: '16px 14px 0', borderRadius: 6, overflow: 'hidden', flexShrink: 0 }}>
+        <div style={{
+          height: 160,
+          background: `linear-gradient(135deg, hsl(${hue},60%,22%) 0%, hsl(${hue},40%,12%) 100%)`,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}>
+          {/* Vinyl record */}
+          <div style={{ position: 'relative', width: 90, height: 90 }}>
+            <div style={{
+              width: 90, height: 90, borderRadius: '50%',
+              background: `conic-gradient(from 0deg, #111 0deg, #222 20deg, #111 40deg, #222 60deg, #111 80deg, #222 100deg, #111 120deg, #222 140deg, #111 160deg, #222 180deg, #111 200deg, #222 220deg, #111 240deg, #222 260deg, #111 280deg, #222 300deg, #111 320deg, #222 340deg, #111 360deg)`,
+              boxShadow: '0 0 20px rgba(0,0,0,0.6)',
+              animation: playing ? 'spin 4s linear infinite' : 'none',
+            }} />
+            <div style={{
+              position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)',
+              width: 24, height: 24, borderRadius: '50%',
+              background: `hsl(${hue},55%,35%)`,
+              boxShadow: `0 0 0 3px #111`,
+            }} />
+          </div>
+        </div>
       </div>
 
-      {/* Time */}
-      <div className="flex justify-between px-3 py-[4px]" style={{ background: '#111' }}>
-        <span className="font-terminal text-[20px] text-[#00ff88]">{fmt(elapsed)}</span>
-        <span className="font-terminal text-[11px] text-[#00ff88] opacity-50 self-end pb-1">
-          {trackIdx + 1}/{TRACKS.length}
-        </span>
+      {/* Track info */}
+      <div style={{ padding: '10px 14px 4px' }}>
+        <div style={{ fontSize: 15, fontWeight: 700, color: '#fff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{track.title}</div>
+        <div style={{ fontSize: 12, color: '#b3b3b3', marginTop: 2 }}>{track.artist}</div>
+      </div>
+
+      {/* Progress */}
+      <div style={{ padding: '6px 14px' }}>
+        <input
+          type="range" min={0} max={duration || 1} step={0.5} value={current}
+          onChange={seek}
+          style={{ width: '100%', accentColor: '#1DB954', cursor: 'pointer', height: 3 }}
+        />
+        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: '#b3b3b3', marginTop: 2 }}>
+          <span>{fmt(current)}</span>
+          <span>{fmt(duration)}</span>
+        </div>
       </div>
 
       {/* Controls */}
-      <div className="flex items-center justify-center gap-2 py-2 px-3" style={{ background: '#222', borderTop: '1px solid #333' }}>
-        {[
-          { label: '⏮', action: () => handleTrack(-1), title: 'Prev' },
-          { label: playing ? '⏸' : '▶', action: handlePlayPause, title: playing ? 'Pause' : 'Play', active: true },
-          { label: '⏹', action: stopPlayback, title: 'Stop' },
-          { label: '⏭', action: () => handleTrack(1), title: 'Next' },
-        ].map(btn => (
-          <button
-            key={btn.label}
-            onClick={btn.action}
-            title={btn.title}
-            className="font-terminal text-[16px] px-3 py-1"
-            style={{
-              background: btn.active && playing ? '#005500' : '#333',
-              border: '1px solid #555',
-              color: '#00ff88',
-              cursor: 'pointer',
-            }}
-          >
-            {btn.label}
-          </button>
-        ))}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 18, padding: '4px 14px 8px' }}>
+        <button onClick={() => setShuffle(s => !s)} title="Shuffle"
+          style={{ background: 'none', border: 'none', cursor: 'pointer', color: shuffle ? '#1DB954' : '#b3b3b3', fontSize: 14, padding: 0 }}>⇄</button>
+        <button onClick={prev} title="Previous"
+          style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#fff', fontSize: 18, padding: 0 }}>⏮</button>
+        <button onClick={togglePlay} title={playing ? 'Pause' : 'Play'}
+          style={{
+            width: 38, height: 38, borderRadius: '50%', border: 'none', cursor: 'pointer',
+            background: '#1DB954', color: '#000', fontSize: 16, display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>
+          {playing ? '⏸' : '▶'}
+        </button>
+        <button onClick={next} title="Next"
+          style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#fff', fontSize: 18, padding: 0 }}>⏭</button>
+        <button onClick={() => setRepeat(r => !r)} title="Repeat"
+          style={{ background: 'none', border: 'none', cursor: 'pointer', color: repeat ? '#1DB954' : '#b3b3b3', fontSize: 14, padding: 0 }}>↻</button>
       </div>
 
       {/* Volume */}
-      <div className="flex items-center gap-2 px-3 py-2" style={{ background: '#1a1a1a' }}>
-        <span className="font-terminal text-[11px] text-[#00ff88]">VOL</span>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '0 14px 8px' }}>
+        <span style={{ color: '#b3b3b3', fontSize: 12 }}>🔈</span>
         <input
           type="range" min={0} max={1} step={0.01} value={volume}
-          onChange={e => handleVolume(Number(e.target.value))}
-          className="flex-1 cursor-pointer"
-          style={{ accentColor: '#00ff88' }}
+          onChange={changeVolume}
+          style={{ flex: 1, accentColor: '#1DB954', cursor: 'pointer', height: 3 }}
         />
-        <span className="font-terminal text-[11px] text-[#00ff88] w-[30px] text-right">
-          {Math.round(volume * 100)}
-        </span>
+        <span style={{ color: '#b3b3b3', fontSize: 12 }}>🔊</span>
       </div>
 
-      {/* Playlist */}
-      <div className="flex-1 overflow-y-auto" style={{ background: '#111', borderTop: '1px solid #333' }}>
+      {/* Queue */}
+      <div style={{ flex: 1, overflowY: 'auto', borderTop: '1px solid #282828' }}>
+        <div style={{ padding: '8px 14px 4px', fontSize: 10, fontWeight: 700, color: '#b3b3b3', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Queue</div>
         {TRACKS.map((t, i) => (
           <div
             key={i}
-            onClick={() => { setTrackIdx(i); if (playing) playTrack(i, volume) }}
-            className="flex items-center gap-2 px-3 py-[5px] cursor-pointer"
-            style={{ background: i === trackIdx ? '#003300' : 'transparent', borderBottom: '1px solid #1a1a1a' }}
+            onClick={() => { setIdx(i); setPlaying(false); setTimeout(() => { audioRef.current?.play().then(() => setPlaying(true)).catch(() => {}) }, 50) }}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 10,
+              padding: '6px 14px', cursor: 'pointer',
+              background: i === idx ? 'rgba(255,255,255,0.07)' : 'transparent',
+            }}
+            onMouseEnter={e => { if (i !== idx) (e.currentTarget as HTMLDivElement).style.background = 'rgba(255,255,255,0.04)' }}
+            onMouseLeave={e => { if (i !== idx) (e.currentTarget as HTMLDivElement).style.background = 'transparent' }}
           >
-            <span className="font-terminal text-[11px]" style={{ color: i === trackIdx ? '#00ff88' : '#666' }}>
-              {playing && i === trackIdx ? '▶' : String(i + 1).padStart(2, '0')}
-            </span>
-            <span className="font-terminal text-[11px] flex-1 truncate" style={{ color: i === trackIdx ? '#ffff00' : '#888' }}>
-              {t.title}
-            </span>
+            <div style={{
+              width: 28, height: 28, borderRadius: 3, flexShrink: 0,
+              background: `linear-gradient(135deg, hsl(${t.hue},55%,28%), hsl(${t.hue},40%,16%))`,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 10, color: i === idx ? '#1DB954' : '#b3b3b3',
+            }}>
+              {i === idx && playing ? '▶' : String(i + 1)}
+            </div>
+            <div style={{ flex: 1, overflow: 'hidden' }}>
+              <div style={{ fontSize: 12, fontWeight: i === idx ? 700 : 400, color: i === idx ? '#1DB954' : '#fff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{t.title}</div>
+              <div style={{ fontSize: 10, color: '#b3b3b3' }}>{t.artist}</div>
+            </div>
           </div>
         ))}
       </div>
+
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   )
 }
