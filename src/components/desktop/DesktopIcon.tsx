@@ -18,11 +18,16 @@ const ICON_MAP: Record<AppId, string> = {
   'control-panel': '🎛️',
   'my-computer': '💻',
   'music-player': '🎵',
+  'ask-me': '🤖',
+  'minesweeper': '💣',
+  'paint': '🎨',
+  'defrag': '💾',
 }
 
 export const DESKTOP_ICONS: DesktopIconConfig[] = [
   { appId: 'my-computer', label: 'My Computer', icon: ICON_MAP['my-computer'] },
   { appId: 'projects', label: 'My Projects', icon: ICON_MAP['projects'] },
+  { appId: 'ask-me', label: 'Ask About Me', icon: ICON_MAP['ask-me'] },
   { appId: 'about-me', label: 'About Me', icon: ICON_MAP['about-me'] },
   { appId: 'skills', label: 'Skills.exe', icon: ICON_MAP['skills'] },
   { appId: 'resume', label: 'Resume.pdf', icon: ICON_MAP['resume'] },
@@ -30,7 +35,10 @@ export const DESKTOP_ICONS: DesktopIconConfig[] = [
   { appId: 'terminal', label: 'Terminal', icon: ICON_MAP['terminal'] },
   { appId: 'browser', label: 'Internet Explorer', icon: ICON_MAP['browser'] },
   { appId: 'solitaire', label: 'Solitaire', icon: ICON_MAP['solitaire'] },
-  { appId: 'music-player', label: 'Winamp', icon: ICON_MAP['music-player'] },
+  { appId: 'minesweeper', label: 'Minesweeper', icon: ICON_MAP['minesweeper'] },
+  { appId: 'paint', label: 'Paint', icon: ICON_MAP['paint'] },
+  { appId: 'music-player', label: 'Spotify', icon: ICON_MAP['music-player'] },
+  { appId: 'defrag', label: 'Defrag', icon: ICON_MAP['defrag'] },
   { appId: 'control-panel', label: 'Control Panel', icon: ICON_MAP['control-panel'] },
   { appId: 'recycle-bin', label: 'Recycle Bin', icon: ICON_MAP['recycle-bin'] },
 ]

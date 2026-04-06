@@ -24,6 +24,10 @@ const AppComponents: Record<AppId, React.LazyExoticComponent<AppComponent>> = {
   'control-panel': lazy(() => import('@/components/apps/ControlPanel/ControlPanel').then(m => ({ default: m.ControlPanel }))),
   'my-computer': lazy(() => import('@/components/apps/MyComputer/MyComputer').then(m => ({ default: m.MyComputer }))),
   'music-player': lazy(() => import('@/components/apps/MusicPlayer/MusicPlayer').then(m => ({ default: m.MusicPlayer }))),
+  'ask-me':       lazy(() => import('@/components/apps/AskMe/AskMe').then(m => ({ default: m.AskMe }))),
+  'minesweeper':  lazy(() => import('@/components/apps/Minesweeper/Minesweeper').then(m => ({ default: m.Minesweeper }))),
+  'paint':        lazy(() => import('@/components/apps/Paint/Paint').then(m => ({ default: m.Paint }))),
+  'defrag':       lazy(() => import('@/components/apps/Defrag/Defrag').then(m => ({ default: m.Defrag }))),
 }
 
 const DIRECTIONS = ['n', 'ne', 'e', 'se', 's', 'sw', 'w', 'nw'] as const

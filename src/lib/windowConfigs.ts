@@ -63,4 +63,24 @@ export const WINDOW_CONFIGS: Record<AppId, WindowDefaults> = {
     size: { width: 325, height: 475 },
     position: { x: 300, y: 100 },
   },
+  'ask-me': {
+    title: 'Ask About Demetre — AI Chat',
+    size: { width: 475, height: 575 },
+    position: { x: 150, y: 60 },
+  },
+  'minesweeper': {
+    title: 'Minesweeper',
+    size: { width: 320, height: 380 },
+    position: { x: 250, y: 120 },
+  },
+  'paint': {
+    title: 'Paint',
+    size: { width: 750, height: 520 },
+    position: { x: 80, y: 50 },
+  },
+  'defrag': {
+    title: 'Disk Defragmenter',
+    size: { width: 560, height: 440 },
+    position: { x: 160, y: 80 },
+  },
 }

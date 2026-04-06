@@ -21,7 +21,11 @@ const MENU_ITEMS: StartMenuItem[] = [
   { label: 'Internet Explorer', appId: 'browser', icon: '🌐' },
   { label: 'Terminal', appId: 'terminal', icon: '🖥️' },
   { label: 'Winamp', appId: 'music-player', icon: '🎵' },
+  { label: 'Ask About Me', appId: 'ask-me', icon: '🤖' },
+  { label: 'Minesweeper', appId: 'minesweeper', icon: '💣' },
   { label: 'Solitaire', appId: 'solitaire', icon: '🃏' },
+  { label: 'Paint', appId: 'paint', icon: '🎨' },
+  { label: 'Defrag', appId: 'defrag', icon: '💾' },
   { label: 'Control Panel', appId: 'control-panel', icon: '🎛️' },
   { label: 'Contact', appId: 'contact', icon: '✉️' },
 ]

@@ -11,6 +11,10 @@ export type AppId =
   | 'control-panel'
   | 'my-computer'
   | 'music-player'
+  | 'ask-me'
+  | 'minesweeper'
+  | 'paint'
+  | 'defrag'
 
 export interface WindowState {
   id: string

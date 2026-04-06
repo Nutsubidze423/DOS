@@ -1,0 +1,102 @@
+'use client'
+
+import { useEffect, useRef, useState } from 'react'
+
+interface RemoteCursor { x: number; y: number; color: string; id: string }
+
+const PUSHER_KEY     = process.env.NEXT_PUBLIC_PUSHER_KEY
+const PUSHER_CLUSTER = process.env.NEXT_PUBLIC_PUSHER_CLUSTER
+
+export function MultiplayerCursors() {
+  const [cursors, setCursors] = useState<Record<string, RemoteCursor>>({})
+  const channelRef = useRef<unknown>(null)
+  const myIdRef    = useRef<string>(Math.random().toString(36).slice(2, 9))
+  const timeouts   = useRef<Record<string, ReturnType<typeof setTimeout>>>({})
+
+  useEffect(() => {
+    if (!PUSHER_KEY || !PUSHER_CLUSTER) return
+
+    let pusher: { subscribe: (ch: string) => unknown; disconnect: () => void } | null = null
+
+    const init = async () => {
+      const { default: PusherClient } = await import('pusher-js')
+
+      pusher = new PusherClient(PUSHER_KEY!, {
+        cluster: PUSHER_CLUSTER!,
+        authEndpoint: '/api/pusher/auth',
+      })
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const ch = pusher!.subscribe('presence-cursors') as any
+      channelRef.current = ch
+
+      ch.bind('client-cursor', (data: { x: number; y: number; color: string; id: string }) => {
+        if (data.id === myIdRef.current) return
+        setCursors(prev => ({ ...prev, [data.id]: data }))
+        if (timeouts.current[data.id]) clearTimeout(timeouts.current[data.id])
+        timeouts.current[data.id] = setTimeout(() => {
+          setCursors(prev => { const n = { ...prev }; delete n[data.id]; return n })
+        }, 5000)
+      })
+    }
+
+    init()
+
+    const onMove = throttle((e: MouseEvent) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const ch = channelRef.current as any
+      if (!ch?.trigger) return
+      try {
+        ch.trigger('client-cursor', { x: e.clientX, y: e.clientY, id: myIdRef.current, color: '#00ff88' })
+      } catch { /* not yet subscribed */ }
+    }, 40)
+
+    window.addEventListener('mousemove', onMove)
+
+    return () => {
+      window.removeEventListener('mousemove', onMove)
+      pusher?.disconnect()
+      Object.values(timeouts.current).forEach(clearTimeout)
+    }
+  }, [])
+
+  if (!PUSHER_KEY) return null
+
+  return (
+    <>
+      {Object.values(cursors).map(c => (
+        <div
+          key={c.id}
+          style={{
+            position: 'fixed', left: c.x, top: c.y,
+            pointerEvents: 'none', zIndex: 99990,
+            transform: 'translate(-2px, -2px)',
+          }}
+        >
+          {/* Cursor arrow */}
+          <svg width="16" height="20" viewBox="0 0 16 20" fill="none">
+            <path d="M0 0 L0 16 L4 12 L7 19 L9 18 L6 11 L11 11 Z" fill={c.color} stroke="#000" strokeWidth="1" />
+          </svg>
+          {/* Label */}
+          <div style={{
+            position: 'absolute', top: 18, left: 4,
+            background: c.color, color: '#000',
+            fontSize: 10, fontWeight: 700,
+            padding: '1px 5px', borderRadius: 3,
+            whiteSpace: 'nowrap', fontFamily: 'monospace',
+          }}>
+            visitor
+          </div>
+        </div>
+      ))}
+    </>
+  )
+}
+
+function throttle<T extends unknown[]>(fn: (...args: T) => void, ms: number) {
+  let last = 0
+  return (...args: T) => {
+    const now = Date.now()
+    if (now - last >= ms) { last = now; fn(...args) }
+  }
+}

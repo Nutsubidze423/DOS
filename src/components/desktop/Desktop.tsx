@@ -8,6 +8,7 @@ import { ContextMenu } from './ContextMenu'
 import { WindowManager } from '@/components/windows/WindowManager'
 import { Taskbar } from '@/components/taskbar/Taskbar'
 import { Screensaver } from './Screensaver'
+import { MultiplayerCursors } from './MultiplayerCursors'
 import { initSounds } from '@/lib/sounds'
 
 export function Desktop() {
@@ -54,6 +55,7 @@ export function Desktop() {
       <Taskbar />
       <CRTOverlay />
       <Screensaver />
+      <MultiplayerCursors />
     </div>
   )
 }
