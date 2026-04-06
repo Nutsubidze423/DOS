@@ -47,10 +47,12 @@ export function SystemTray() {
     return () => clearInterval(interval)
   }, [timeOffset])
 
-  // Battery API
+  // Battery API (non-standard — typed manually to avoid eslint any)
   useEffect(() => {
     if (typeof navigator === 'undefined' || !('getBattery' in navigator)) return
-    ;(navigator as any).getBattery().then((bat: any) => {
+    type BatteryManager = { level: number; charging: boolean; addEventListener: (e: string, cb: () => void) => void }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ;(navigator as unknown as { getBattery: () => Promise<BatteryManager> }).getBattery().then((bat) => {
       const sync = () => setBattery({ level: bat.level, charging: bat.charging })
       sync()
       bat.addEventListener('levelchange', sync)
