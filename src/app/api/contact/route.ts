@@ -3,34 +3,51 @@ import { NextRequest } from 'next/server'
 
 export async function POST(request: NextRequest) {
   try {
-    const { name, subject, message } = (await request.json()) as {
+    const apiKey = process.env.RESEND_API_KEY
+    if (!apiKey || apiKey.startsWith('re_placeholder')) {
+      return Response.json({ error: 'Email service not configured' }, { status: 500 })
+    }
+
+    const { name, email, subject, message } = (await request.json()) as {
       name: string
+      email: string
       subject: string
       message: string
     }
 
-    if (!name || !subject || !message) {
+    if (!name || !email || !message) {
       return Response.json({ error: 'Missing required fields' }, { status: 400 })
     }
 
-    const resend = new Resend(process.env.RESEND_API_KEY)
+    const resend = new Resend(apiKey)
 
     const { error } = await resend.emails.send({
-      from: 'PortfolioOS <onboarding@resend.dev>',
+      from: 'PortfolioOS Contact <onboarding@resend.dev>',
       to: ['demetrenutsubidze423@gmail.com'],
-      subject: `[PortfolioOS] ${subject}`,
-      text: `From: ${name}\n\n${message}`,
-      html: `<p><strong>From:</strong> ${name}</p><p>${message.replace(/\n/g, '<br/>')}</p>`,
+      reply_to: `${name} <${email}>`,
+      subject: subject ? `[PortfolioOS] ${subject}` : `[PortfolioOS] Message from ${name}`,
+      text: `From: ${name} <${email}>\n\n${message}`,
+      html: `
+        <div style="font-family:monospace;max-width:600px;margin:0 auto;padding:20px;background:#f5f5f5;border:1px solid #ccc">
+          <h2 style="color:#000080;margin-top:0">New message via PortfolioOS</h2>
+          <p><strong>From:</strong> ${name}</p>
+          <p><strong>Email:</strong> <a href="mailto:${email}">${email}</a></p>
+          ${subject ? `<p><strong>Subject:</strong> ${subject}</p>` : ''}
+          <hr style="border-color:#ccc"/>
+          <p style="white-space:pre-wrap">${message.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</p>
+        </div>
+      `,
     })
 
     if (error) {
       console.error('[contact/route] Resend error:', error)
-      return Response.json({ error: 'Failed to send email' }, { status: 500 })
+      return Response.json({ error: error.message }, { status: 500 })
     }
 
     return Response.json({ success: true })
   } catch (err) {
-    console.error('[contact/route] Unexpected error:', err)
-    return Response.json({ error: 'Internal server error' }, { status: 500 })
+    const msg = err instanceof Error ? err.message : 'Internal server error'
+    console.error('[contact/route] Error:', msg)
+    return Response.json({ error: msg }, { status: 500 })
   }
 }
