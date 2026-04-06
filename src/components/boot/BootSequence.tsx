@@ -8,6 +8,7 @@ import { useSoundEffect } from '@/hooks/useSoundEffect'
 import { BiosScreen } from './BiosScreen'
 import { Win98ProgressBar } from './Win98ProgressBar'
 import { Win98Logo } from './Win98Logo'
+import { initSounds } from '@/lib/sounds'
 
 export function BootSequence() {
   const { phase, setPhase, skip } = useBootStore()
@@ -34,7 +35,7 @@ export function BootSequence() {
   return (
     <motion.div
       className="fixed inset-0 bg-black z-[10000] cursor-pointer"
-      onClick={skip}
+      onClick={() => { initSounds(); skip() }}
       title="Click to skip"
     >
       <AnimatePresence mode="wait">

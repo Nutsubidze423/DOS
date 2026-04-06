@@ -1,15 +1,21 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { DesktopWallpaper } from './DesktopWallpaper'
 import { CRTOverlay } from './CRTOverlay'
 import { DesktopIcon, DESKTOP_ICONS } from './DesktopIcon'
 import { ContextMenu } from './ContextMenu'
 import { WindowManager } from '@/components/windows/WindowManager'
 import { Taskbar } from '@/components/taskbar/Taskbar'
+import { initSounds } from '@/lib/sounds'
 
 export function Desktop() {
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null)
+
+  // Prime the audio context on first render so sounds work immediately
+  useEffect(() => {
+    initSounds()
+  }, [])
 
   const handleContextMenu = useCallback((e: React.MouseEvent) => {
     e.preventDefault()

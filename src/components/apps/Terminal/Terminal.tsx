@@ -58,7 +58,8 @@ export function Terminal() {
         })
 
         if (!res.ok || !res.body) {
-          throw new Error('API error')
+          const errText = await res.text().catch(() => 'unknown error')
+          throw new Error(errText || `HTTP ${res.status}`)
         }
 
         const reader = res.body.getReader()
@@ -75,11 +76,12 @@ export function Terminal() {
 
         setHistory((prev) => [...prev, { type: 'ai', content: accumulated }])
         setStreamBuffer('')
-      } catch {
+      } catch (err) {
         play('error')
+        const msg = err instanceof Error ? err.message : 'Unknown error'
         setHistory((prev) => [
           ...prev,
-          { type: 'error', content: 'Error: Could not reach AI assistant. Check your connection.' },
+          { type: 'error', content: `Error: ${msg}` },
         ])
         setStreamBuffer('')
       } finally {

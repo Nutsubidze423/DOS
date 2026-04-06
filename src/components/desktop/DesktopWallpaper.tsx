@@ -11,48 +11,36 @@ export function DesktopWallpaper() {
     const ctx = canvas.getContext('2d')
     if (!ctx) return
 
-    let hue = 220
-    let animFrame: number
-
-    const resize = () => {
+    const draw = () => {
       canvas.width = window.innerWidth
       canvas.height = window.innerHeight
-    }
-    resize()
-    window.addEventListener('resize', resize)
 
-    const draw = () => {
-      hue = (hue + 0.02) % 360
+      // Classic Win98 teal desktop background
+      const w = canvas.width
+      const h = canvas.height
 
-      const grad = ctx.createRadialGradient(
-        canvas.width * 0.3, canvas.height * 0.4, 0,
-        canvas.width * 0.5, canvas.height * 0.5, canvas.width * 0.8
-      )
-      grad.addColorStop(0, `hsla(${hue}, 60%, 4%, 1)`)
-      grad.addColorStop(0.5, `hsla(${(hue + 20) % 360}, 50%, 3%, 1)`)
-      grad.addColorStop(1, `hsla(220, 70%, 2%, 1)`)
+      // Base teal fill
+      ctx.fillStyle = '#008080'
+      ctx.fillRect(0, 0, w, h)
 
+      // Very subtle radial highlight in center — gives depth like a CRT monitor
+      const grad = ctx.createRadialGradient(w * 0.5, h * 0.42, 0, w * 0.5, h * 0.5, w * 0.75)
+      grad.addColorStop(0, 'rgba(0,160,160,0.35)')
+      grad.addColorStop(0.5, 'rgba(0,128,128,0.10)')
+      grad.addColorStop(1, 'rgba(0,50,60,0.40)')
       ctx.fillStyle = grad
-      ctx.fillRect(0, 0, canvas.width, canvas.height)
+      ctx.fillRect(0, 0, w, h)
 
-      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
-      const data = imageData.data
-      for (let i = 0; i < data.length; i += 16) {
-        const noise = (Math.random() - 0.5) * 6
-        data[i] = Math.max(0, Math.min(255, data[i] + noise))
-        data[i + 1] = Math.max(0, Math.min(255, data[i + 1] + noise))
-        data[i + 2] = Math.max(0, Math.min(255, data[i + 2] + noise))
+      // Subtle scan-line texture — every 2px a faint dark stripe
+      for (let y = 0; y < h; y += 2) {
+        ctx.fillStyle = 'rgba(0,0,0,0.04)'
+        ctx.fillRect(0, y, w, 1)
       }
-      ctx.putImageData(imageData, 0, 0)
-
-      animFrame = requestAnimationFrame(draw)
     }
 
     draw()
-    return () => {
-      cancelAnimationFrame(animFrame)
-      window.removeEventListener('resize', resize)
-    }
+    window.addEventListener('resize', draw)
+    return () => window.removeEventListener('resize', draw)
   }, [])
 
   return (

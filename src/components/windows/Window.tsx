@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, lazy, Suspense, useEffect } from 'react'
+import { useCallback, lazy, Suspense, useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useWindowStore } from '@/store/windowStore'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
@@ -37,6 +37,17 @@ export function Window({ id }: WindowProps) {
   const { play } = useSoundEffect()
   const win = windows[id]
 
+  // Track viewport size so maximize uses real pixel numbers (framer-motion
+  // cannot interpolate CSS string values like '100vw')
+  const [vpW, setVpW] = useState(0)
+  const [vpH, setVpH] = useState(0)
+  useEffect(() => {
+    const update = () => { setVpW(window.innerWidth); setVpH(window.innerHeight) }
+    update()
+    window.addEventListener('resize', update)
+    return () => window.removeEventListener('resize', update)
+  }, [])
+
   // Play open sound on mount
   useEffect(() => {
     play('window-open')
@@ -58,8 +69,10 @@ export function Window({ id }: WindowProps) {
   const maximizedStyle = {
     x: 0,
     y: 0,
-    width: '100vw',
-    height: `calc(100vh - ${TASKBAR_HEIGHT}px)`,
+    width: vpW || window.innerWidth,
+    height: (vpH || window.innerHeight) - TASKBAR_HEIGHT,
+    scale: 1,
+    opacity: 1,
   }
 
   const normalStyle = {
@@ -67,6 +80,8 @@ export function Window({ id }: WindowProps) {
     y: win.position.y,
     width: win.size.width,
     height: win.size.height,
+    scale: 1,
+    opacity: 1,
   }
 
   return (

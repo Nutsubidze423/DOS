@@ -19,16 +19,20 @@ Guidelines:
 - Stay in character — you are a terminal assistant, not a general AI
 - Max 150 words per response`
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!)
-
 export async function POST(request: NextRequest) {
   try {
+    const apiKey = process.env.GEMINI_API_KEY
+    if (!apiKey) {
+      return new Response('GEMINI_API_KEY not configured', { status: 500 })
+    }
+
     const { message } = (await request.json()) as { message: string }
 
     if (!message || typeof message !== 'string') {
       return new Response('Invalid request', { status: 400 })
     }
 
+    const genAI = new GoogleGenerativeAI(apiKey)
     const model = genAI.getGenerativeModel({
       model: 'gemini-2.0-flash',
       systemInstruction: SYSTEM_PROMPT,
@@ -60,7 +64,8 @@ export async function POST(request: NextRequest) {
       },
     })
   } catch (err) {
-    console.error('[terminal/route] Error:', err)
-    return new Response('Internal server error', { status: 500 })
+    const message = err instanceof Error ? err.message : String(err)
+    console.error('[terminal/route] Error:', message)
+    return new Response(`AI error: ${message}`, { status: 500 })
   }
 }
