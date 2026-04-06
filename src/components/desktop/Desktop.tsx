@@ -24,7 +24,7 @@ export function Desktop() {
 
   return (
     <div
-      className="relative w-full h-full overflow-hidden bg-[#0a0a0f]"
+      className="relative w-screen h-screen overflow-hidden bg-[#0a0a0f]"
       onContextMenu={handleContextMenu}
       onClick={() => setContextMenu(null)}
     >
@@ -33,7 +33,7 @@ export function Desktop() {
       {/* Icon grid */}
       <div
         className="absolute top-4 left-4 flex flex-col flex-wrap gap-1"
-        style={{ height: 'calc(100vh - 56px)', zIndex: 10 }}
+        style={{ height: 'calc(100vh - 66px)', zIndex: 10 }}
       >
         {DESKTOP_ICONS.map((icon) => (
           <DesktopIcon key={icon.appId} config={icon} />

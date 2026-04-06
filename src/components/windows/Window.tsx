@@ -30,7 +30,7 @@ interface WindowProps {
 
 const SPRING = { type: 'spring' as const, stiffness: 300, damping: 30 }
 
-const TASKBAR_HEIGHT = 40
+const TASKBAR_HEIGHT = 50
 
 export function Window({ id }: WindowProps) {
   const { windows, focusWindow } = useWindowStore()
@@ -67,14 +67,11 @@ export function Window({ id }: WindowProps) {
 
   const AppComponent = AppComponents[win.appId]
 
-  // The page is rendered inside a scale(1.25) container that is 80vw×80vh,
-  // so the usable area is window.innerWidth/1.25 × window.innerHeight/1.25.
-  const SCALE = 1.25
   const maximizedStyle = {
     x: 0,
     y: 0,
-    width: (vpW || window.innerWidth) / SCALE,
-    height: ((vpH || window.innerHeight) / SCALE) - TASKBAR_HEIGHT,
+    width: vpW || window.innerWidth,
+    height: (vpH || window.innerHeight) - TASKBAR_HEIGHT,
     scale: 1,
     opacity: 1,
   }

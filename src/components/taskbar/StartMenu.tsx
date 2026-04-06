@@ -41,7 +41,7 @@ export function StartMenu({ onClose }: StartMenuProps) {
 
   return (
     <motion.div
-      className="absolute bottom-[40px] left-0 w-[220px] overflow-hidden"
+      className="absolute bottom-[50px] left-0 w-[275px] overflow-hidden"
       style={{
         background: 'var(--color-chrome)',
         border: '2px solid',
@@ -65,7 +65,7 @@ export function StartMenu({ onClose }: StartMenuProps) {
         <div className="flex-1">
           {/* Header */}
           <div
-            className="px-3 py-2 font-ui text-white text-[13px] font-bold"
+            className="px-3 py-2 font-ui text-white text-[16px] font-bold"
             style={{ background: 'linear-gradient(90deg, #000080, #1084d0)' }}
           >
             Demetre Nutsubidze
@@ -75,10 +75,10 @@ export function StartMenu({ onClose }: StartMenuProps) {
           {MENU_ITEMS.map((item) => (
             <button
               key={item.label}
-              className="w-full flex items-center gap-3 px-3 py-[6px] font-ui text-[12px] text-black hover:bg-[#000080] hover:text-white text-left"
+              className="w-full flex items-center gap-3 px-3 py-[8px] font-ui text-[14px] text-black hover:bg-[#000080] hover:text-white text-left"
               onClick={() => handleItem(item)}
             >
-              <span className="text-[16px] w-5 text-center">{item.icon}</span>
+              <span className="text-[20px] w-6 text-center">{item.icon}</span>
               {item.label}
             </button>
           ))}
@@ -88,7 +88,7 @@ export function StartMenu({ onClose }: StartMenuProps) {
 
           {/* Shutdown */}
           <button
-            className="w-full flex items-center gap-3 px-3 py-[6px] font-ui text-[12px] text-black hover:bg-[#000080] hover:text-white text-left"
+            className="w-full flex items-center gap-3 px-3 py-[8px] font-ui text-[14px] text-black hover:bg-[#000080] hover:text-white text-left"
             onClick={() => {
               onClose()
               if (confirm('Shut down PortfolioOS?')) {
@@ -97,7 +97,7 @@ export function StartMenu({ onClose }: StartMenuProps) {
               }
             }}
           >
-            <span className="text-[16px] w-5 text-center">⏻</span>
+            <span className="text-[20px] w-6 text-center">⏻</span>
             Shut Down...
           </button>
         </div>

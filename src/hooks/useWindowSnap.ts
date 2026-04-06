@@ -10,7 +10,7 @@ export function useWindowSnap() {
 
   const checkSnap = useCallback(
     (id: string, x: number, y: number) => {
-      const TASKBAR_HEIGHT = 40
+      const TASKBAR_HEIGHT = 50
       const W = window.innerWidth
       const H = window.innerHeight - TASKBAR_HEIGHT
 

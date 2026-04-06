@@ -36,7 +36,7 @@ export function Taskbar() {
   return (
     <div
       data-taskbar=""
-      className="absolute bottom-0 left-0 right-0 h-[40px] flex items-center px-[4px] gap-[4px]"
+      className="absolute bottom-0 left-0 right-0 h-[50px] flex items-center px-[5px] gap-[5px]"
       style={{
         background: 'var(--color-chrome)',
         borderTop: '2px solid var(--color-bevel-light)',
@@ -48,7 +48,7 @@ export function Taskbar() {
 
       {/* Divider */}
       <div
-        className="h-[26px] w-[2px] mx-[2px]"
+        className="h-[33px] w-[2px] mx-[2px]"
         style={{ borderLeft: '1px solid var(--color-chrome-dark)', borderRight: '1px solid var(--color-bevel-light)' }}
       />
 

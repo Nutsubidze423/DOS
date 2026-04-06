@@ -48,7 +48,7 @@ export function DesktopIcon({ config }: DesktopIconProps) {
 
   return (
     <motion.button
-      className="flex flex-col items-center gap-1 w-[72px] py-2 px-1 rounded cursor-pointer border border-transparent focus:outline-none"
+      className="flex flex-col items-center gap-1 w-[90px] py-2 px-1 rounded cursor-pointer border border-transparent focus:outline-none"
       style={{
         background: selected ? 'rgba(0,0,128,0.5)' : 'transparent',
         borderColor: selected ? 'rgba(0,100,200,0.6)' : 'transparent',
@@ -60,7 +60,7 @@ export function DesktopIcon({ config }: DesktopIconProps) {
       aria-label={`Open ${config.label}`}
     >
       <motion.span
-        className="text-[32px] leading-none select-none"
+        className="text-[40px] leading-none select-none"
         style={{
           filter: selected
             ? 'drop-shadow(0 0 8px rgba(0,255,136,0.5))'
@@ -72,7 +72,7 @@ export function DesktopIcon({ config }: DesktopIconProps) {
         {config.icon}
       </motion.span>
       <span
-        className="font-ui text-[11px] text-white text-center leading-tight select-none"
+        className="font-ui text-[13px] text-white text-center leading-tight select-none"
         style={{ textShadow: '1px 1px 2px rgba(0,0,0,0.9)' }}
       >
         {config.label}

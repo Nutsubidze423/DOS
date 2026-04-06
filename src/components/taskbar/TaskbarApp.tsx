@@ -24,7 +24,7 @@ export function TaskbarApp({ win, isActive }: TaskbarAppProps) {
 
   return (
     <motion.button
-      className="h-[26px] min-w-[120px] max-w-[160px] flex items-center gap-[6px] px-[8px] font-ui text-[11px] text-black select-none overflow-hidden"
+      className="h-[33px] min-w-[150px] max-w-[200px] flex items-center gap-[6px] px-[10px] font-ui text-[13px] text-black select-none overflow-hidden"
       style={{
         background: 'var(--color-chrome)',
         border: '2px solid',
@@ -37,14 +37,10 @@ export function TaskbarApp({ win, isActive }: TaskbarAppProps) {
       whileHover={{ filter: 'brightness(1.05)' }}
       layoutId={`taskbar-${win.id}`}
     >
-      {/* Phosphor dot — active indicator */}
       {!win.isMinimized && (
         <motion.div
-          className="w-[6px] h-[6px] rounded-full flex-shrink-0"
-          style={{
-            background: '#00cc66',
-            boxShadow: '0 0 4px #00ff88',
-          }}
+          className="w-[8px] h-[8px] rounded-full flex-shrink-0"
+          style={{ background: '#00cc66', boxShadow: '0 0 4px #00ff88' }}
           animate={{ opacity: [0.6, 1, 0.6] }}
           transition={{ repeat: Infinity, duration: 2, ease: 'easeInOut' }}
         />

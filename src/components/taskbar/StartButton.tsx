@@ -10,7 +10,7 @@ interface StartButtonProps {
 export function StartButton({ onClick, isMenuOpen }: StartButtonProps) {
   return (
     <motion.button
-      className="h-[30px] font-ui text-[12px] font-black text-black flex items-center gap-[5px] px-[8px] select-none"
+      className="h-[38px] font-ui text-[15px] font-black text-black flex items-center gap-[6px] px-[10px] select-none"
       style={{
         background: 'var(--color-chrome-light)',
         border: '2px solid',
@@ -22,7 +22,7 @@ export function StartButton({ onClick, isMenuOpen }: StartButtonProps) {
       whileTap={{ filter: 'brightness(0.9)' }}
     >
       {/* 4-color Windows flag */}
-      <div className="grid grid-cols-2 gap-[1px] w-[16px] h-[16px] flex-shrink-0">
+      <div className="grid grid-cols-2 gap-[1px] w-[20px] h-[20px] flex-shrink-0">
         <div className="bg-red-600" />
         <div className="bg-green-600" />
         <div className="bg-blue-700" />
