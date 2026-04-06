@@ -7,6 +7,10 @@ export type AppId =
   | 'contact'
   | 'recycle-bin'
   | 'browser'
+  | 'solitaire'
+  | 'control-panel'
+  | 'my-computer'
+  | 'music-player'
 
 export interface WindowState {
   id: string

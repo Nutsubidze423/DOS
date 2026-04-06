@@ -43,4 +43,24 @@ export const WINDOW_CONFIGS: Record<AppId, WindowDefaults> = {
     size: { width: 975, height: 675 },
     position: { x: 75, y: 50 },
   },
+  'solitaire': {
+    title: 'Solitaire',
+    size: { width: 575, height: 525 },
+    position: { x: 200, y: 80 },
+  },
+  'control-panel': {
+    title: 'Control Panel',
+    size: { width: 475, height: 475 },
+    position: { x: 225, y: 100 },
+  },
+  'my-computer': {
+    title: 'My Computer',
+    size: { width: 575, height: 525 },
+    position: { x: 175, y: 75 },
+  },
+  'music-player': {
+    title: 'Winamp — PortfolioOS Audio',
+    size: { width: 325, height: 475 },
+    position: { x: 300, y: 100 },
+  },
 }

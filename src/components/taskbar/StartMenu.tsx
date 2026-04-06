@@ -16,9 +16,13 @@ interface StartMenuItem {
 const MENU_ITEMS: StartMenuItem[] = [
   { label: 'About Me', appId: 'about-me', icon: '📝' },
   { label: 'My Projects', appId: 'projects', icon: '📁' },
+  { label: 'My Computer', appId: 'my-computer', icon: '💻' },
   { label: 'Skills.exe', appId: 'skills', icon: '⚙️' },
   { label: 'Internet Explorer', appId: 'browser', icon: '🌐' },
   { label: 'Terminal', appId: 'terminal', icon: '🖥️' },
+  { label: 'Winamp', appId: 'music-player', icon: '🎵' },
+  { label: 'Solitaire', appId: 'solitaire', icon: '🃏' },
+  { label: 'Control Panel', appId: 'control-panel', icon: '🎛️' },
   { label: 'Contact', appId: 'contact', icon: '✉️' },
 ]
 

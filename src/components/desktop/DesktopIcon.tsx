@@ -14,9 +14,14 @@ const ICON_MAP: Record<AppId, string> = {
   'contact': '✉️',
   'recycle-bin': '🗑️',
   'browser': '🌐',
+  'solitaire': '🃏',
+  'control-panel': '🎛️',
+  'my-computer': '💻',
+  'music-player': '🎵',
 }
 
 export const DESKTOP_ICONS: DesktopIconConfig[] = [
+  { appId: 'my-computer', label: 'My Computer', icon: ICON_MAP['my-computer'] },
   { appId: 'projects', label: 'My Projects', icon: ICON_MAP['projects'] },
   { appId: 'about-me', label: 'About Me', icon: ICON_MAP['about-me'] },
   { appId: 'skills', label: 'Skills.exe', icon: ICON_MAP['skills'] },
@@ -24,6 +29,9 @@ export const DESKTOP_ICONS: DesktopIconConfig[] = [
   { appId: 'contact', label: 'Contact', icon: ICON_MAP['contact'] },
   { appId: 'terminal', label: 'Terminal', icon: ICON_MAP['terminal'] },
   { appId: 'browser', label: 'Internet Explorer', icon: ICON_MAP['browser'] },
+  { appId: 'solitaire', label: 'Solitaire', icon: ICON_MAP['solitaire'] },
+  { appId: 'music-player', label: 'Winamp', icon: ICON_MAP['music-player'] },
+  { appId: 'control-panel', label: 'Control Panel', icon: ICON_MAP['control-panel'] },
   { appId: 'recycle-bin', label: 'Recycle Bin', icon: ICON_MAP['recycle-bin'] },
 ]
 
