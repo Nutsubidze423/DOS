@@ -114,9 +114,9 @@ export function SystemTray() {
 
   const PANEL_STYLE: React.CSSProperties = {
     position: 'absolute',
-    bottom: 30,
+    bottom: '100%',   // always sits directly above the tray, never overlaps it
     right: 0,
-    minWidth: 200,
+    minWidth: 220,
     background: 'var(--color-chrome)',
     border: '2px solid',
     borderColor: 'var(--color-bevel-light) var(--color-bevel-dark) var(--color-bevel-dark) var(--color-bevel-light)',
@@ -302,61 +302,37 @@ export function SystemTray() {
         </div>
       )}
 
-      {/* Tray icon strip */}
+      {/* Tray icon strip — h-full fills the 50px taskbar */}
       <div
-        className="h-[26px] flex items-center font-ui text-[11px] text-black select-none"
+        className="h-full flex items-center font-ui text-[13px] text-black select-none"
         style={{
           background: 'var(--color-chrome)',
           border: '2px solid',
           borderColor: 'var(--color-bevel-dark) var(--color-bevel-light) var(--color-bevel-light) var(--color-bevel-dark)',
         }}
       >
-        <button
-          onClick={() => togglePanel('wifi')}
-          title={online ? 'Network: Connected' : 'Network: Disconnected'}
-          className={BTN}
-        >
-          <span className="text-[14px]">{online ? '📶' : '🚫'}</span>
+        <button onClick={() => togglePanel('wifi')} title={online ? 'Network: Connected' : 'Network: Disconnected'} className={BTN}>
+          <span className="text-[18px]">{online ? '📶' : '🚫'}</span>
         </button>
 
-        <button
-          onClick={() => togglePanel('battery')}
-          title={batteryPct !== null ? `Battery: ${batteryPct}%` : 'Power Options'}
-          className={BTN}
-        >
-          <span className="text-[14px]">🔋</span>
-          {batteryPct !== null && (
-            <span className="text-[9px] leading-none ml-[1px]">{batteryPct}%</span>
-          )}
+        <button onClick={() => togglePanel('battery')} title={batteryPct !== null ? `Battery: ${batteryPct}%` : 'Power Options'} className={BTN}>
+          <span className="text-[18px]">🔋</span>
+          {batteryPct !== null && <span className="text-[11px] leading-none ml-[2px]">{batteryPct}%</span>}
         </button>
 
-        <button
-          onClick={() => togglePanel('bluetooth')}
-          title="Bluetooth"
-          className={BTN}
-        >
-          <span className="text-[14px]">🔵</span>
+        <button onClick={() => togglePanel('bluetooth')} title="Bluetooth" className={BTN}>
+          <span className="text-[18px]">🔵</span>
         </button>
 
-        <button
-          onClick={() => togglePanel('volume')}
-          title={muted ? 'Volume: Muted' : `Volume: ${volume}%`}
-          className={BTN}
-        >
-          <span className="text-[14px]">{muted ? '🔇' : '🔊'}</span>
+        <button onClick={() => togglePanel('volume')} title={muted ? 'Volume: Muted' : `Volume: ${volume}%`} className={BTN}>
+          <span className="text-[18px]">{muted ? '🔇' : '🔊'}</span>
         </button>
 
         <button
           onClick={() => togglePanel('clock')}
           title={`${fullDate}\nClick to change time`}
           className={BTN}
-          style={{
-            paddingLeft: 8,
-            borderLeft: '1px solid var(--color-bevel-dark)',
-            color: 'var(--color-title-from)',
-            fontWeight: 'bold',
-            whiteSpace: 'nowrap',
-          }}
+          style={{ paddingLeft: 10, borderLeft: '1px solid var(--color-bevel-dark)', color: 'var(--color-title-from)', fontWeight: 'bold', whiteSpace: 'nowrap', fontSize: 14 }}
         >
           {time}
         </button>
