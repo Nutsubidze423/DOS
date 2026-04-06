@@ -67,11 +67,12 @@ export function MultiplayerCursors() {
 
     window.addEventListener('mousemove', onMove)
 
+    const capturedTimeouts = timeouts.current
     return () => {
       window.removeEventListener('mousemove', onMove)
       subscribedRef.current = false
       pusher?.disconnect()
-      Object.values(timeouts.current).forEach(clearTimeout)
+      Object.values(capturedTimeouts).forEach(clearTimeout)
     }
   }, [])
 
