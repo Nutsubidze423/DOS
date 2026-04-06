@@ -13,6 +13,7 @@ const ICON_MAP: Record<AppId, string> = {
   'resume': '📄',
   'contact': '✉️',
   'recycle-bin': '🗑️',
+  'browser': '🌐',
 }
 
 export const DESKTOP_ICONS: DesktopIconConfig[] = [
@@ -22,6 +23,7 @@ export const DESKTOP_ICONS: DesktopIconConfig[] = [
   { appId: 'resume', label: 'Resume.pdf', icon: ICON_MAP['resume'] },
   { appId: 'contact', label: 'Contact', icon: ICON_MAP['contact'] },
   { appId: 'terminal', label: 'Terminal', icon: ICON_MAP['terminal'] },
+  { appId: 'browser', label: 'Internet Explorer', icon: ICON_MAP['browser'] },
   { appId: 'recycle-bin', label: 'Recycle Bin', icon: ICON_MAP['recycle-bin'] },
 ]
 

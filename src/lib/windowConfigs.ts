@@ -41,4 +41,9 @@ export const WINDOW_CONFIGS: Record<AppId, WindowDefaults> = {
     size: { width: 460, height: 380 },
     position: { x: 150, y: 80 },
   },
+  'browser': {
+    title: 'Internet Explorer',
+    size: { width: 780, height: 540 },
+    position: { x: 60, y: 40 },
+  },
 }

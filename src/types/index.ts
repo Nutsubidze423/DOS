@@ -6,6 +6,7 @@ export type AppId =
   | 'resume'
   | 'contact'
   | 'recycle-bin'
+  | 'browser'
 
 export interface WindowState {
   id: string
@@ -26,6 +27,7 @@ export interface DesktopIconConfig {
 }
 
 export type BootPhase =
+  | 'off'
   | 'idle'
   | 'bios'
   | 'progress'

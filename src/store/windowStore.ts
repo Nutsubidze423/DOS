@@ -13,6 +13,7 @@ interface WindowStoreState {
   focusWindow: (id: string) => void
   updatePosition: (id: string, position: { x: number; y: number }) => void
   updateSize: (id: string, size: { width: number; height: number }) => void
+  resetAll: () => void
 }
 
 const STAGGER_OFFSET = 24
@@ -142,4 +143,6 @@ export const useWindowStore = create<WindowStoreState>((set, get) => ({
       },
     }))
   },
+
+  resetAll: () => set({ windows: {}, zCounter: 10 }),
 }))

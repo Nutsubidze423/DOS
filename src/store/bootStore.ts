@@ -6,11 +6,13 @@ interface BootStoreState {
   skipped: boolean
   setPhase: (phase: BootPhase) => void
   skip: () => void
+  powerOff: () => void
 }
 
 export const useBootStore = create<BootStoreState>((set) => ({
-  phase: 'idle',
+  phase: 'off',
   skipped: false,
   setPhase: (phase) => set({ phase }),
   skip: () => set({ phase: 'done', skipped: true }),
+  powerOff: () => set({ phase: 'off', skipped: false }),
 }))

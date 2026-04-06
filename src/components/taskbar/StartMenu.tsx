@@ -3,6 +3,7 @@
 import { useCallback } from 'react'
 import { motion } from 'framer-motion'
 import { useWindowStore } from '@/store/windowStore'
+import { useBootStore } from '@/store/bootStore'
 import { AppId } from '@/types'
 
 interface StartMenuItem {
@@ -16,6 +17,7 @@ const MENU_ITEMS: StartMenuItem[] = [
   { label: 'About Me', appId: 'about-me', icon: '📝' },
   { label: 'My Projects', appId: 'projects', icon: '📁' },
   { label: 'Skills.exe', appId: 'skills', icon: '⚙️' },
+  { label: 'Internet Explorer', appId: 'browser', icon: '🌐' },
   { label: 'Terminal', appId: 'terminal', icon: '🖥️' },
   { label: 'Contact', appId: 'contact', icon: '✉️' },
 ]
@@ -25,7 +27,8 @@ interface StartMenuProps {
 }
 
 export function StartMenu({ onClose }: StartMenuProps) {
-  const { openWindow } = useWindowStore()
+  const { openWindow, resetAll } = useWindowStore()
+  const { powerOff } = useBootStore()
 
   const handleItem = useCallback(
     (item: StartMenuItem) => {
@@ -88,7 +91,10 @@ export function StartMenu({ onClose }: StartMenuProps) {
             className="w-full flex items-center gap-3 px-3 py-[6px] font-ui text-[12px] text-black hover:bg-[#000080] hover:text-white text-left"
             onClick={() => {
               onClose()
-              if (confirm('Shut down PortfolioOS?')) window.location.reload()
+              if (confirm('Shut down PortfolioOS?')) {
+                resetAll()
+                powerOff()
+              }
             }}
           >
             <span className="text-[16px] w-5 text-center">⏻</span>
