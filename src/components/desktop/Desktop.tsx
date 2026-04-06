@@ -26,7 +26,7 @@ export function Desktop() {
 
   return (
     <div
-      className="relative w-screen h-screen overflow-hidden bg-[#0a0a0f]"
+      className="relative w-full h-full overflow-hidden bg-[#0a0a0f]"
       onContextMenu={handleContextMenu}
       onClick={() => setContextMenu(null)}
     >
