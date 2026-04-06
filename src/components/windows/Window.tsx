@@ -114,7 +114,7 @@ export function Window({ id }: WindowProps) {
           onPointerDown={handleFocus}
         >
           <TitleBar id={id} title={win.title} isActive={isActive} />
-          <div className="flex-1 overflow-hidden bg-os-chrome relative">
+          <div className="flex-1 overflow-hidden bg-os-chrome relative" onContextMenu={e => e.preventDefault()}>
             <Suspense
               fallback={
                 <div className="flex items-center justify-center h-full font-terminal text-black text-lg">
