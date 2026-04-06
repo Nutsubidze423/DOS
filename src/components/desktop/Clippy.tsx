@@ -60,7 +60,7 @@ export function Clippy() {
   // React to newly opened apps
   useEffect(() => {
     const currentApps = new Set(Object.values(windows).map(w => w.appId))
-    for (const appId of currentApps) {
+    for (const appId of Array.from(currentApps)) {
       if (!prevAppsRef.current.has(appId) && MESSAGES_BY_APP[appId]) {
         setTimeout(() => showMessage(MESSAGES_BY_APP[appId]), 1000)
       }
