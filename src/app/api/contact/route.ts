@@ -1,8 +1,6 @@
 import { Resend } from 'resend'
 import { NextRequest } from 'next/server'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
-
 export async function POST(request: NextRequest) {
   try {
     const { name, subject, message } = (await request.json()) as {
@@ -14,6 +12,8 @@ export async function POST(request: NextRequest) {
     if (!name || !subject || !message) {
       return Response.json({ error: 'Missing required fields' }, { status: 400 })
     }
+
+    const resend = new Resend(process.env.RESEND_API_KEY)
 
     const { error } = await resend.emails.send({
       from: 'PortfolioOS <onboarding@resend.dev>',
