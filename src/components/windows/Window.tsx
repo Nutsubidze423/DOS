@@ -67,11 +67,14 @@ export function Window({ id }: WindowProps) {
 
   const AppComponent = AppComponents[win.appId]
 
+  // The page is rendered inside a scale(1.25) container that is 80vw×80vh,
+  // so the usable area is window.innerWidth/1.25 × window.innerHeight/1.25.
+  const SCALE = 1.25
   const maximizedStyle = {
     x: 0,
     y: 0,
-    width: vpW || window.innerWidth,
-    height: (vpH || window.innerHeight) - TASKBAR_HEIGHT,
+    width: (vpW || window.innerWidth) / SCALE,
+    height: ((vpH || window.innerHeight) / SCALE) - TASKBAR_HEIGHT,
     scale: 1,
     opacity: 1,
   }
@@ -104,7 +107,6 @@ export function Window({ id }: WindowProps) {
           exit={reducedMotion ? { opacity: 0 } : { scale: 0.85, opacity: 0 }}
           transition={reducedMotion ? { duration: 0 } : SPRING}
           onPointerDown={handleFocus}
-          layout
         >
           <TitleBar id={id} title={win.title} isActive={isActive} />
           <div className="flex-1 overflow-hidden bg-os-chrome relative">

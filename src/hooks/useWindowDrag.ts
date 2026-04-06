@@ -6,6 +6,7 @@ import { useWindowStore } from '@/store/windowStore'
 import { useWindowSnap } from './useWindowSnap'
 
 const TASKBAR_HEIGHT = 40
+const SCALE = 1.25 // must match the scale wrapper in page.tsx
 
 export function useWindowDrag(id: string) {
   const { windows, updatePosition, focusWindow, maximizeWindow } = useWindowStore()
@@ -16,8 +17,10 @@ export function useWindowDrag(id: string) {
       const win = windows[id]
       if (!win || win.isMaximized) return
 
-      const maxX = window.innerWidth - win.size.width
-      const maxY = window.innerHeight - TASKBAR_HEIGHT - win.size.height
+      const areaW = window.innerWidth / SCALE
+      const areaH = window.innerHeight / SCALE
+      const maxX = areaW - win.size.width
+      const maxY = areaH - TASKBAR_HEIGHT - win.size.height
 
       const clampedX = Math.max(0, Math.min(x, maxX))
       const clampedY = Math.max(0, Math.min(y, maxY))

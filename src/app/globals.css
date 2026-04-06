@@ -30,10 +30,6 @@ html, body {
   padding: 0;
 }
 
-/* 125% zoom — makes everything appear 25% larger in the browser */
-html {
-  zoom: 1.25;
-}
 
 /* ── Win98 bevel utilities ── */
 .bevel-raised {
