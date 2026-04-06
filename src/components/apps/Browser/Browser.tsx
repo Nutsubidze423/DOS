@@ -59,9 +59,9 @@ export function Browser() {
   const handleLoad = useCallback(() => {
     setLoading(false)
     try {
-      // If we can access contentDocument the page loaded fine
-      iframeRef.current?.contentDocument // throws if blocked by CORS
-      setBlocked(false)
+      // If we can access contentDocument the page loaded fine (throws if blocked by CORS)
+      const doc = iframeRef.current?.contentDocument
+      setBlocked(doc === undefined)
     } catch {
       setBlocked(true)
     }
