@@ -7,7 +7,6 @@ import { DesktopIcon, DESKTOP_ICONS } from './DesktopIcon'
 import { ContextMenu } from './ContextMenu'
 import { WindowManager } from '@/components/windows/WindowManager'
 import { Taskbar } from '@/components/taskbar/Taskbar'
-import { Clippy } from './Clippy'
 import { Screensaver } from './Screensaver'
 import { initSounds } from '@/lib/sounds'
 
@@ -54,7 +53,6 @@ export function Desktop() {
 
       <Taskbar />
       <CRTOverlay />
-      <Clippy />
       <Screensaver />
     </div>
   )

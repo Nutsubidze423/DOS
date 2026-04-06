@@ -179,7 +179,7 @@ export function Solitaire() {
     setState(s => {
       const pile = s.tableau[pi]
       const card = pile[ci]
-      if (!card.faceUp) {
+      if (card && !card.faceUp) {
         if (ci === pile.length - 1) {
           const tab = s.tableau.map((p, i) => i === pi ? p.map((c, j) => j === ci ? { ...c, faceUp: true } : c) : p)
           setSel(null)
