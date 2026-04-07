@@ -63,9 +63,9 @@ function CameraZoom({ animState, onDone }: { animState: AnimState; onDone: () =>
   const progress   = useRef(0)
   const fired      = useRef(false)
 
-  // Monitor face sits roughly at (0, 0.1, 0.4) after normalisation
-  const endPos  = new THREE.Vector3(0, 0.1, 0.5)
-  const endLook = new THREE.Vector3(0, 0.1, 0)
+  // Monitor face — slightly lower so camera lands on screen centre not top
+  const endPos  = new THREE.Vector3(0, -0.08, 0.5)
+  const endLook = new THREE.Vector3(0, -0.08, 0)
 
   useFrame((_, dt) => {
     if (animState !== 'zooming') return
@@ -106,17 +106,15 @@ function Scene({
       {/* Dark bg */}
       <color attach="background" args={['#0d0d10']} />
 
-      {/* HDRI for realistic reflections / material colour */}
-      <Environment preset="night" />
+      {/* HDRI — provides base reflections without blowing out colours */}
+      <Environment preset="warehouse" />
 
       {/* Warm key light */}
-      <directionalLight position={[4, 6, 4]} intensity={3} color="#fff5e0" castShadow />
+      <directionalLight position={[4, 6, 4]} intensity={1.0} color="#fff5e0" castShadow />
       {/* Cool fill */}
-      <directionalLight position={[-3, 2, 1]} intensity={1.2} color="#8898cc" />
-      {/* Top bounce */}
-      <directionalLight position={[0, 8, 0]} intensity={0.8} color="#c8cce0" />
-      {/* Ambient */}
-      <ambientLight intensity={1.2} />
+      <directionalLight position={[-3, 2, 1]} intensity={0.3} color="#8898cc" />
+      {/* Ambient — keep it low so textures show */}
+      <ambientLight intensity={0.25} />
 
       <Suspense fallback={null}>
         <DeskModel onLoaded={onLoaded} />
@@ -168,7 +166,7 @@ export function PowerOn() {
           antialias: true,
           outputColorSpace: THREE.SRGBColorSpace,
           toneMapping: THREE.ACESFilmicToneMapping,
-          toneMappingExposure: 1.2,
+          toneMappingExposure: 0.7,
         }}
       >
         <Scene animState={animState} onLoaded={handleLoaded} onZoomDone={handleZoomDone} />
