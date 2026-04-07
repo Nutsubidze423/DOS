@@ -74,8 +74,8 @@ function CameraZoom({ animState, onDone }: { animState: AnimState; onDone: () =>
   const progress   = useRef(0)
   const fired      = useRef(false)
 
-  const endPos  = new THREE.Vector3(0, -0.08, 0.5)
-  const endLook = new THREE.Vector3(0, -0.08, 0)
+  const endPos  = new THREE.Vector3(0.2, 0.02, 0.5)
+  const endLook = new THREE.Vector3(0.2, 0.02, 0)
 
   useFrame((_, dt) => {
     if (animState !== 'zooming') return
