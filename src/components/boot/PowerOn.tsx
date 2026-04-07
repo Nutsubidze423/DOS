@@ -2,7 +2,7 @@
 
 import { useRef, useState, useCallback, Suspense, useEffect } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
-import { useGLTF, OrbitControls, Center, Stage } from '@react-three/drei'
+import { useGLTF, OrbitControls, Environment } from '@react-three/drei'
 import * as THREE from 'three'
 import { useBootStore } from '@/store/bootStore'
 import { initSounds } from '@/lib/sounds'
@@ -13,54 +13,76 @@ function easeInOutCubic(t: number) {
   return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2
 }
 
-// ─── Model ────────────────────────────────────────────────────────────────────
-function DeskModel({ onLoaded }: { onLoaded: () => void }) {
+// ─── Model — auto-centers and scales to fill view ────────────────────────────
+function DeskModel({ onLoaded }: { onLoaded: (center: THREE.Vector3, size: THREE.Vector3) => void }) {
   const { scene } = useGLTF('/computer_desk__retro_workspace_setup.glb')
+  const groupRef  = useRef<THREE.Group>(null!)
 
   useEffect(() => {
-    onLoaded()
+    if (!groupRef.current) return
+    // Compute bounding box to center + scale the model
+    const box    = new THREE.Box3().setFromObject(groupRef.current)
+    const size   = new THREE.Vector3()
+    const center = new THREE.Vector3()
+    box.getSize(size)
+    box.getCenter(center)
+
+    // Center the group at origin
+    groupRef.current.position.sub(center)
+
+    // Scale so longest axis = 3 units
+    const maxDim = Math.max(size.x, size.y, size.z)
+    const scale  = 3 / maxDim
+    groupRef.current.scale.setScalar(scale)
+
+    // Enable shadows on all meshes
+    groupRef.current.traverse(obj => {
+      if ((obj as THREE.Mesh).isMesh) {
+        (obj as THREE.Mesh).castShadow    = true
+        ;(obj as THREE.Mesh).receiveShadow = true
+      }
+    })
+
+    onLoaded(center, size)
   }, [onLoaded])
 
   return (
-    <Center>
+    <group ref={groupRef}>
       <primitive object={scene} />
-    </Center>
+    </group>
   )
 }
 
 useGLTF.preload('/computer_desk__retro_workspace_setup.glb')
 
-// ─── Camera zoom ──────────────────────────────────────────────────────────────
-// End position: very close to the monitor screen
-const CAM_END_POS  = new THREE.Vector3(0, 0.18, 0.25)
-const CAM_END_LOOK = new THREE.Vector3(0, 0.18, 0)
-
+// ─── Camera zoom into screen ──────────────────────────────────────────────────
 function CameraZoom({ animState, onDone }: { animState: AnimState; onDone: () => void }) {
   const { camera } = useThree()
   const startPos   = useRef<THREE.Vector3 | null>(null)
   const startLook  = useRef<THREE.Vector3>(new THREE.Vector3())
-  const t          = useRef(0)
+  const progress   = useRef(0)
   const fired      = useRef(false)
+
+  // Monitor face sits roughly at (0, 0.1, 0.4) after normalisation
+  const endPos  = new THREE.Vector3(0, 0.1, 0.5)
+  const endLook = new THREE.Vector3(0, 0.1, 0)
 
   useFrame((_, dt) => {
     if (animState !== 'zooming') return
 
-    // Capture start position on first frame of zoom
     if (!startPos.current) {
       startPos.current = camera.position.clone()
-      // Compute where camera is currently looking
       const dir = new THREE.Vector3()
       camera.getWorldDirection(dir)
-      startLook.current = camera.position.clone().add(dir)
+      startLook.current.copy(camera.position).add(dir)
     }
 
-    t.current = Math.min(t.current + dt * 0.5, 1)
-    const e   = easeInOutCubic(t.current)
+    progress.current = Math.min(progress.current + dt * 0.48, 1)
+    const e = easeInOutCubic(progress.current)
+    camera.position.lerpVectors(startPos.current, endPos, e)
+    camera.lookAt(new THREE.Vector3().lerpVectors(startLook.current, endLook, e))
 
-    camera.position.lerpVectors(startPos.current!, CAM_END_POS, e)
-    camera.lookAt(new THREE.Vector3().lerpVectors(startLook.current, CAM_END_LOOK, e))
-
-    if (t.current >= 1 && !fired.current) {
+    if (progress.current >= 1 && !fired.current) {
       fired.current = true
       onDone()
     }
@@ -76,26 +98,38 @@ function Scene({
   onZoomDone,
 }: {
   animState: AnimState
-  onLoaded: () => void
+  onLoaded: (c: THREE.Vector3, s: THREE.Vector3) => void
   onZoomDone: () => void
 }) {
   return (
     <>
+      {/* Dark bg */}
+      <color attach="background" args={['#0d0d10']} />
+
+      {/* HDRI for realistic reflections / material colour */}
+      <Environment preset="night" />
+
+      {/* Warm key light */}
+      <directionalLight position={[4, 6, 4]} intensity={3} color="#fff5e0" castShadow />
+      {/* Cool fill */}
+      <directionalLight position={[-3, 2, 1]} intensity={1.2} color="#8898cc" />
+      {/* Top bounce */}
+      <directionalLight position={[0, 8, 0]} intensity={0.8} color="#c8cce0" />
+      {/* Ambient */}
+      <ambientLight intensity={1.2} />
+
       <Suspense fallback={null}>
-        <Stage intensity={0.5} environment="studio" adjustCamera>
-          <DeskModel onLoaded={onLoaded} />
-        </Stage>
+        <DeskModel onLoaded={onLoaded} />
       </Suspense>
 
-      {/* Disable controls while zooming */}
       <OrbitControls
         enabled={animState === 'idle'}
         enablePan={false}
         enableZoom
-        minDistance={1}
-        maxDistance={14}
+        minDistance={1.5}
+        maxDistance={10}
         autoRotate={animState === 'idle'}
-        autoRotateSpeed={0.5}
+        autoRotateSpeed={0.55}
         makeDefault
       />
 
@@ -106,10 +140,10 @@ function Scene({
 
 // ─── Export ───────────────────────────────────────────────────────────────────
 export function PowerOn() {
-  const { setPhase }                  = useBootStore()
-  const [animState, setAnimState]     = useState<AnimState>('idle')
-  const [flash, setFlash]             = useState(false)
-  const [loaded, setLoaded]           = useState(false)
+  const { setPhase }              = useBootStore()
+  const [animState, setAnimState] = useState<AnimState>('idle')
+  const [flash, setFlash]         = useState(false)
+  const [loaded, setLoaded]       = useState(false)
 
   const handleLoaded = useCallback(() => setLoaded(true), [])
 
@@ -121,86 +155,104 @@ export function PowerOn() {
 
   const handleZoomDone = useCallback(() => {
     setFlash(true)
-    setTimeout(() => {
-      setFlash(false)
-      setPhase('bios')
-    }, 400)
+    setTimeout(() => { setFlash(false); setPhase('bios') }, 420)
   }, [setPhase])
 
   return (
-    <div className="fixed inset-0 bg-[#0d0d0d]" style={{ zIndex: 9999 }}>
+    <div style={{ position: 'fixed', inset: 0, background: '#0d0d10', zIndex: 9999 }}>
       <Canvas
         dpr={[1, 2]}
-        camera={{ position: [0, 0.5, 3.5], fov: 45, near: 0.01, far: 100 }}
-        gl={{ antialias: true, outputColorSpace: THREE.SRGBColorSpace, toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 1.1 }}
+        shadows
+        camera={{ position: [2, 1.2, 4], fov: 42, near: 0.01, far: 100 }}
+        gl={{
+          antialias: true,
+          outputColorSpace: THREE.SRGBColorSpace,
+          toneMapping: THREE.ACESFilmicToneMapping,
+          toneMappingExposure: 1.2,
+        }}
       >
         <Scene animState={animState} onLoaded={handleLoaded} onZoomDone={handleZoomDone} />
       </Canvas>
 
-      {/* Loading indicator — pointer-events:none so drag still works */}
+      {/* Loading text — pointer-events:none so OrbitControls still works */}
       {!loaded && (
-        <div
-          className="absolute inset-0 flex items-center justify-center"
-          style={{ zIndex: 25, pointerEvents: 'none' }}
-        >
-          <div
-            className="font-ui text-[12px] tracking-widest uppercase"
-            style={{ color: '#444', animation: 'ldp 1.4s ease-in-out infinite' }}
-          >
+        <div style={{
+          position: 'absolute', inset: 0,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          pointerEvents: 'none', zIndex: 25,
+        }}>
+          <span style={{ color: '#444', fontFamily: 'monospace', fontSize: 13, letterSpacing: '0.25em', textTransform: 'uppercase', animation: 'ldp 1.4s ease-in-out infinite' }}>
             Loading...
-          </div>
-          <style>{`@keyframes ldp{0%,100%{opacity:.25}50%{opacity:.9}}`}</style>
+          </span>
         </div>
       )}
 
       {/* White flash */}
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{ background: '#fff', opacity: flash ? 1 : 0, transition: flash ? 'none' : 'opacity 0.45s ease-out', zIndex: 20 }}
-      />
+      <div style={{
+        position: 'absolute', inset: 0,
+        background: '#fff',
+        opacity: flash ? 1 : 0,
+        transition: flash ? 'none' : 'opacity 0.45s ease-out',
+        pointerEvents: 'none', zIndex: 20,
+      }} />
 
-      {/* Power button */}
+      {/* Power button — centered at bottom */}
       {animState === 'idle' && (
         <button
           onClick={handlePower}
           disabled={!loaded}
-          className="absolute left-1/2 -translate-x-1/2"
+          aria-label="Power on"
           style={{
+            position: 'absolute',
             bottom: 36,
+            left: '50%',
+            transform: 'translateX(-50%)',
             zIndex: 30,
-            width: 64,
-            height: 64,
+            width: 66,
+            height: 66,
             borderRadius: '50%',
             background: 'radial-gradient(circle, #1a0800 0%, #0a0400 100%)',
             border: '2.5px solid #ff6600',
-            boxShadow: '0 0 18px rgba(255,100,0,0.55)',
+            boxShadow: '0 0 20px rgba(255,100,0,0.6)',
             cursor: loaded ? 'pointer' : 'default',
-            opacity: loaded ? 1 : 0.4,
+            opacity: loaded ? 1 : 0.35,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            animation: loaded ? 'btnP 2.2s ease-in-out infinite' : 'none',
+            animation: loaded ? 'btnP 2s ease-in-out infinite' : 'none',
           }}
-          aria-label="Power on"
         >
           <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-            <path d="M14 2 L14 14" stroke="#ff7700" strokeWidth="2.5" strokeLinecap="round" />
+            <path d="M14 2 L14 13" stroke="#ff7700" strokeWidth="2.5" strokeLinecap="round" />
             <path d="M8 6 A8 8 0 1 0 20 6" stroke="#ff7700" strokeWidth="2.5" strokeLinecap="round" fill="none" />
           </svg>
         </button>
       )}
 
-      {/* Hint */}
+      {/* Hint text */}
       {animState === 'idle' && loaded && (
-        <div
-          className="absolute left-1/2 -translate-x-1/2 font-ui text-[11px] tracking-[0.22em] uppercase pointer-events-none select-none"
-          style={{ bottom: 110, color: '#555', animation: 'btnP 2.8s ease-in-out infinite' }}
-        >
-          Drag to look · Scroll to zoom
+        <div style={{
+          position: 'absolute',
+          bottom: 112,
+          left: '50%',
+          transform: 'translateX(-50%)',
+          whiteSpace: 'nowrap',
+          color: '#555',
+          fontFamily: 'monospace',
+          fontSize: 11,
+          letterSpacing: '0.22em',
+          textTransform: 'uppercase',
+          pointerEvents: 'none',
+          animation: 'btnP 2.8s ease-in-out infinite',
+        }}>
+          Drag to rotate · Scroll to zoom
         </div>
       )}
 
-      <style>{`@keyframes btnP{0%,100%{opacity:.4}50%{opacity:1}}`}</style>
+      <style>{`
+        @keyframes ldp  { 0%,100%{opacity:.2} 50%{opacity:.85} }
+        @keyframes btnP { 0%,100%{opacity:.4} 50%{opacity:1}   }
+      `}</style>
     </div>
   )
 }
