@@ -88,7 +88,7 @@ export function Defrag() {
       return -1
     }
 
-    let totalFrag = arr.filter(b => b === 'fragmented').length
+    const initialFrag = arr.filter(b => b === 'fragmented').length
     let moved = 0
 
     while (true) {
@@ -107,10 +107,8 @@ export function Defrag() {
       arr[fi] = 'free'
       setBlocks([...arr])
       moved++
-      setProgress(20 + Math.floor((moved / totalFrag) * 78))
+      setProgress(20 + Math.min(78, Math.floor((moved / initialFrag) * 78)))
       await delay(20)
-
-      totalFrag = arr.filter(b => b === 'fragmented').length
     }
 
     setProgress(100)

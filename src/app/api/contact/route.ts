@@ -21,6 +21,9 @@ export async function POST(request: NextRequest) {
 
     const resend = new Resend(apiKey)
 
+    const esc = (s: string) =>
+      s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;')
+
     const { error } = await resend.emails.send({
       from: 'PortfolioOS Contact <onboarding@resend.dev>',
       to: ['demetrenutsubidze423@gmail.com'],
@@ -30,11 +33,11 @@ export async function POST(request: NextRequest) {
       html: `
         <div style="font-family:monospace;max-width:600px;margin:0 auto;padding:20px;background:#f5f5f5;border:1px solid #ccc">
           <h2 style="color:#000080;margin-top:0">New message via PortfolioOS</h2>
-          <p><strong>From:</strong> ${name}</p>
-          <p><strong>Email:</strong> <a href="mailto:${email}">${email}</a></p>
-          ${subject ? `<p><strong>Subject:</strong> ${subject}</p>` : ''}
+          <p><strong>From:</strong> ${esc(name)}</p>
+          <p><strong>Email:</strong> <a href="mailto:${esc(email)}">${esc(email)}</a></p>
+          ${subject ? `<p><strong>Subject:</strong> ${esc(subject)}</p>` : ''}
           <hr style="border-color:#ccc"/>
-          <p style="white-space:pre-wrap">${message.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</p>
+          <p style="white-space:pre-wrap">${esc(message)}</p>
         </div>
       `,
     })

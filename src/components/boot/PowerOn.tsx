@@ -197,6 +197,17 @@ export function PowerOn() {
         </button>
       )}
 
+      {animState === 'idle' && (
+        <div style={{ position: 'absolute', top: 36, left: '50%', transform: 'translateX(-50%)', textAlign: 'center', pointerEvents: 'none' }}>
+          <div style={{ color: '#c8c8c8', fontFamily: 'monospace', fontSize: 22, fontWeight: 700, letterSpacing: '0.04em', animation: 'btnP 3s ease-in-out infinite' }}>
+            Demetre Nutsubidze
+          </div>
+          <div style={{ color: '#555', fontFamily: 'monospace', fontSize: 12, letterSpacing: '0.18em', marginTop: 6, textTransform: 'uppercase', animation: 'btnP 3.4s ease-in-out infinite' }}>
+            a portfolio you can actually play
+          </div>
+        </div>
+      )}
+
       {animState === 'idle' && loaded && (
         <div style={{ position: 'absolute', bottom: 112, left: '50%', transform: 'translateX(-50%)', whiteSpace: 'nowrap', color: '#555', fontFamily: 'monospace', fontSize: 11, letterSpacing: '0.22em', textTransform: 'uppercase', pointerEvents: 'none', animation: 'btnP 2.8s ease-in-out infinite' }}>
           Drag to rotate · Scroll to zoom

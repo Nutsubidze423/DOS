@@ -21,6 +21,7 @@ export function Terminal() {
   const [history, setHistory] = useState<HistoryEntry[]>([
     { type: 'output', content: WELCOME },
   ])
+  const [cmdHistory, setCmdHistory] = useState<string[]>([])
   const [streaming, setStreaming] = useState(false)
   const [streamBuffer, setStreamBuffer] = useState('')
   const bottomRef = useRef<HTMLDivElement>(null)
@@ -33,6 +34,7 @@ export function Terminal() {
   const handleSubmit = useCallback(
     async (input: string) => {
       setHistory((prev) => [...prev, { type: 'input', content: input }])
+      setCmdHistory((prev) => [...prev, input])
 
       const result = runCommand(input)
 
@@ -134,7 +136,7 @@ export function Terminal() {
         className="pt-2 mt-1"
         style={{ borderTop: '1px solid rgba(0,255,136,0.15)' }}
       >
-        <TerminalInput onSubmit={handleSubmit} disabled={streaming} />
+        <TerminalInput onSubmit={handleSubmit} disabled={streaming} history={cmdHistory} />
       </div>
     </div>
   )

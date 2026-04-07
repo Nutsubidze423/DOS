@@ -57,7 +57,7 @@ export function Browser() {
     setLoading(false)
     try {
       const doc = iframeRef.current?.contentDocument
-      setBlocked(doc === undefined)
+      setBlocked(doc == null)
     } catch {
       setBlocked(true)
     }

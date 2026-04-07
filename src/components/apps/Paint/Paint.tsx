@@ -12,6 +12,7 @@ const PALETTE = [
 ]
 
 const SIZES = [1, 3, 6, 10]
+const MAX_UNDO = 20
 
 export function Paint() {
   const canvasRef  = useRef<HTMLCanvasElement>(null)
@@ -21,10 +22,12 @@ export function Paint() {
   const [color, setColor] = useState('#000000')
   const [size, setSize]   = useState(3)
   const [bg, setBg]       = useState('#ffffff')
-  const drawing     = useRef(false)
-  const lastPos     = useRef({ x: 0, y: 0 })
-  const lineStart   = useRef({ x: 0, y: 0 })
-  const snapshotRef = useRef<ImageData | null>(null)
+  const drawing      = useRef(false)
+  const lastPos      = useRef({ x: 0, y: 0 })
+  const lineStart    = useRef({ x: 0, y: 0 })
+  const snapshotRef  = useRef<ImageData | null>(null)
+  const undoStack    = useRef<ImageData[]>([])
+  const redoStack    = useRef<ImageData[]>([])
   bgRef.current = bg
 
   // Init canvas to fill container, then observe resizes preserving content
@@ -41,10 +44,8 @@ export function Paint() {
       ctx.fillRect(0, 0, w, h)
     }
 
-    // Set initial size
     initCanvas(Math.max(400, area.clientWidth - 16), Math.max(300, area.clientHeight - 16))
 
-    // On resize: preserve content
     const ro = new ResizeObserver(() => {
       const newW = Math.max(400, area.clientWidth - 16)
       const newH = Math.max(300, area.clientHeight - 16)
@@ -69,6 +70,15 @@ export function Paint() {
     return { x: Math.round(e.clientX - rect.left), y: Math.round(e.clientY - rect.top) }
   }, [])
 
+  const pushUndo = useCallback(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')!
+    const snap = ctx.getImageData(0, 0, canvas.width, canvas.height)
+    undoStack.current = [...undoStack.current.slice(-MAX_UNDO), snap]
+    redoStack.current = []
+  }, [])
+
   const floodFill = useCallback((ctx: CanvasRenderingContext2D, x: number, y: number, fillColor: string) => {
     const canvas = ctx.canvas
     const data = ctx.getImageData(0, 0, canvas.width, canvas.height)
@@ -76,7 +86,9 @@ export function Paint() {
     const idx = (y * canvas.width + x) * 4
     const targetR = d[idx], targetG = d[idx + 1], targetB = d[idx + 2], targetA = d[idx + 3]
 
-    const [fr, fg, fb] = fillColor.match(/\w\w/g)!.map(h => parseInt(h, 16))
+    const hex = fillColor.match(/[\da-f]{2}/gi)
+    if (!hex || hex.length < 3) return
+    const [fr, fg, fb] = hex.map(h => parseInt(h, 16))
     if (fr === targetR && fg === targetG && fb === targetB && targetA === 255) return
 
     const stack = [[x, y]]
@@ -95,6 +107,7 @@ export function Paint() {
     const ctx = canvasRef.current?.getContext('2d')
     if (!ctx) return
     const pos = getPos(e)
+    pushUndo()
     if (tool === 'fill') { floodFill(ctx, pos.x, pos.y, color); return }
     drawing.current = true
     lastPos.current = pos
@@ -102,7 +115,7 @@ export function Paint() {
     if (tool === 'line') {
       snapshotRef.current = ctx.getImageData(0, 0, ctx.canvas.width, ctx.canvas.height)
     }
-  }, [tool, color, getPos, floodFill])
+  }, [tool, color, getPos, floodFill, pushUndo])
 
   const onMouseMove = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     if (!drawing.current) return
@@ -138,12 +151,40 @@ export function Paint() {
     snapshotRef.current = null
   }, [])
 
+  const undo = useCallback(() => {
+    const canvas = canvasRef.current
+    if (!canvas || undoStack.current.length === 0) return
+    const ctx = canvas.getContext('2d')!
+    const current = ctx.getImageData(0, 0, canvas.width, canvas.height)
+    redoStack.current = [...redoStack.current, current]
+    const prev = undoStack.current[undoStack.current.length - 1]
+    undoStack.current = undoStack.current.slice(0, -1)
+    ctx.putImageData(prev, 0, 0)
+  }, [])
+
+  const redo = useCallback(() => {
+    const canvas = canvasRef.current
+    if (!canvas || redoStack.current.length === 0) return
+    const ctx = canvas.getContext('2d')!
+    const current = ctx.getImageData(0, 0, canvas.width, canvas.height)
+    undoStack.current = [...undoStack.current, current]
+    const next = redoStack.current[redoStack.current.length - 1]
+    redoStack.current = redoStack.current.slice(0, -1)
+    ctx.putImageData(next, 0, 0)
+  }, [])
+
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key === 'z') { e.preventDefault(); undo() }
+    if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.shiftKey && e.key === 'z'))) { e.preventDefault(); redo() }
+  }, [undo, redo])
+
   const clear = useCallback(() => {
+    pushUndo()
     const ctx = canvasRef.current?.getContext('2d')
     if (!ctx) return
     ctx.fillStyle = bg
     ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height)
-  }, [bg])
+  }, [bg, pushUndo])
 
   const save = useCallback(() => {
     const canvas = canvasRef.current
@@ -162,7 +203,11 @@ export function Paint() {
   ]
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: 'var(--color-chrome)', overflow: 'hidden' }}>
+    <div
+      style={{ display: 'flex', flexDirection: 'column', height: '100%', background: 'var(--color-chrome)', overflow: 'hidden' }}
+      onKeyDown={handleKeyDown}
+      tabIndex={-1}
+    >
       {/* Toolbar */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 6px', borderBottom: '1px solid var(--color-bevel-dark)', flexWrap: 'wrap' }}>
         {TOOLS.map(t => (
@@ -178,6 +223,9 @@ export function Paint() {
             <div style={{ width: s + 2, height: s + 2, borderRadius: '50%', background: '#000' }} />
           </button>
         ))}
+        <div style={{ width: 1, height: 22, background: 'var(--color-bevel-dark)' }} />
+        <button onClick={undo} title="Undo (Ctrl+Z)" style={{ padding: '2px 8px', fontSize: 11, cursor: 'pointer', background: 'var(--color-chrome)', border: '2px solid', borderColor: 'var(--color-bevel-light) var(--color-bevel-dark) var(--color-bevel-dark) var(--color-bevel-light)' }}>↩ Undo</button>
+        <button onClick={redo} title="Redo (Ctrl+Y)" style={{ padding: '2px 8px', fontSize: 11, cursor: 'pointer', background: 'var(--color-chrome)', border: '2px solid', borderColor: 'var(--color-bevel-light) var(--color-bevel-dark) var(--color-bevel-dark) var(--color-bevel-light)' }}>↪ Redo</button>
         <div style={{ width: 1, height: 22, background: 'var(--color-bevel-dark)' }} />
         <button onClick={clear} style={{ padding: '2px 8px', fontSize: 11, cursor: 'pointer', background: 'var(--color-chrome)', border: '2px solid', borderColor: 'var(--color-bevel-light) var(--color-bevel-dark) var(--color-bevel-dark) var(--color-bevel-light)' }}>Clear</button>
         <button onClick={save}  style={{ padding: '2px 8px', fontSize: 11, cursor: 'pointer', background: 'var(--color-chrome)', border: '2px solid', borderColor: 'var(--color-bevel-light) var(--color-bevel-dark) var(--color-bevel-dark) var(--color-bevel-light)' }}>Save PNG</button>
