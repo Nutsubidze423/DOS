@@ -13,13 +13,7 @@ function easeInOutCubic(t: number) {
   return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2
 }
 
-// Cream palette for the retro computer setup
-const CREAM_BODY   = new THREE.Color('#cdc9be')   // aged beige plastic
-const CREAM_KEYS   = new THREE.Color('#bfbcb0')   // slightly darker keys
-const CREAM_SCREEN = new THREE.Color('#111a12')   // dark CRT glass
-const CREAM_CUP    = new THREE.Color('#e8e2d8')   // white porcelain cup
-
-// ─── Model — auto-centers and scales to fill view ────────────────────────────
+// ─── Model ────────────────────────────────────────────────────────────────────
 function DeskModel({ onLoaded }: { onLoaded: () => void }) {
   const { scene } = useGLTF('/computer_desk__retro_workspace_setup.glb')
   const groupRef  = useRef<THREE.Group>(null!)
@@ -27,7 +21,6 @@ function DeskModel({ onLoaded }: { onLoaded: () => void }) {
   useEffect(() => {
     if (!groupRef.current) return
 
-    // Compute bounding box to center + scale the model
     const box    = new THREE.Box3().setFromObject(groupRef.current)
     const size   = new THREE.Vector3()
     const center = new THREE.Vector3()
@@ -38,40 +31,12 @@ function DeskModel({ onLoaded }: { onLoaded: () => void }) {
     const maxDim = Math.max(size.x, size.y, size.z)
     groupRef.current.scale.setScalar(3 / maxDim)
 
-    // Override materials — KHR_materials_pbrSpecularGlossiness is not supported
-    // by Three.js r152+, so textures don't load. Apply a hand-crafted cream palette.
+    // Just enable shadows — do NOT touch materials, let the GLB textures render
     groupRef.current.traverse(obj => {
       const mesh = obj as THREE.Mesh
       if (!mesh.isMesh) return
       mesh.castShadow    = true
       mesh.receiveShadow = true
-
-      const n = mesh.name.toLowerCase()
-
-      let color     = CREAM_BODY
-      let roughness = 0.72
-      let metalness = 0.04
-
-      if (n.includes('key') || n.includes('keyboard')) {
-        color     = CREAM_KEYS
-        roughness = 0.78
-      } else if (
-        n.includes('screen') || n.includes('monitor') ||
-        n.includes('display') || n.includes('glass') || n.includes('crt')
-      ) {
-        color     = CREAM_SCREEN
-        roughness = 0.05
-        metalness = 0.15
-      } else if (n.includes('cup') || n.includes('mug') || n.includes('coffee') || n.includes('saucer')) {
-        color     = CREAM_CUP
-        roughness = 0.35
-        metalness = 0.05
-      } else if (n.includes('cable') || n.includes('wire') || n.includes('cord')) {
-        color     = new THREE.Color('#888880')
-        roughness = 0.9
-      }
-
-      mesh.material = new THREE.MeshStandardMaterial({ color, roughness, metalness })
     })
 
     onLoaded()
