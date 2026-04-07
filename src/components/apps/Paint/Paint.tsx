@@ -14,25 +14,53 @@ const PALETTE = [
 const SIZES = [1, 3, 6, 10]
 
 export function Paint() {
-  const canvasRef = useRef<HTMLCanvasElement>(null)
-  const [tool, setTool]     = useState<Tool>('pencil')
-  const [color, setColor]   = useState('#000000')
-  const [size, setSize]     = useState(3)
-  const [bg, setBg]         = useState('#ffffff')
-  const drawing = useRef(false)
-  const lastPos = useRef({ x: 0, y: 0 })
-  const lineStart = useRef({ x: 0, y: 0 })
+  const canvasRef  = useRef<HTMLCanvasElement>(null)
+  const areaRef    = useRef<HTMLDivElement>(null)
+  const bgRef      = useRef('#ffffff')
+  const [tool, setTool]   = useState<Tool>('pencil')
+  const [color, setColor] = useState('#000000')
+  const [size, setSize]   = useState(3)
+  const [bg, setBg]       = useState('#ffffff')
+  const drawing     = useRef(false)
+  const lastPos     = useRef({ x: 0, y: 0 })
+  const lineStart   = useRef({ x: 0, y: 0 })
   const snapshotRef = useRef<ImageData | null>(null)
+  bgRef.current = bg
 
-  // Init canvas
+  // Init canvas to fill container, then observe resizes preserving content
   useEffect(() => {
+    const area   = areaRef.current
     const canvas = canvasRef.current
-    if (!canvas) return
-    const ctx = canvas.getContext('2d')
-    if (!ctx) return
-    ctx.fillStyle = bg
-    ctx.fillRect(0, 0, canvas.width, canvas.height)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    if (!area || !canvas) return
+
+    const initCanvas = (w: number, h: number) => {
+      canvas.width  = w
+      canvas.height = h
+      const ctx = canvas.getContext('2d')!
+      ctx.fillStyle = bgRef.current
+      ctx.fillRect(0, 0, w, h)
+    }
+
+    // Set initial size
+    initCanvas(Math.max(400, area.clientWidth - 16), Math.max(300, area.clientHeight - 16))
+
+    // On resize: preserve content
+    const ro = new ResizeObserver(() => {
+      const newW = Math.max(400, area.clientWidth - 16)
+      const newH = Math.max(300, area.clientHeight - 16)
+      if (newW === canvas.width && newH === canvas.height) return
+      const saved = canvas.toDataURL()
+      canvas.width  = newW
+      canvas.height = newH
+      const ctx = canvas.getContext('2d')!
+      ctx.fillStyle = bgRef.current
+      ctx.fillRect(0, 0, newW, newH)
+      const img = new Image()
+      img.onload = () => ctx.drawImage(img, 0, 0)
+      img.src = saved
+    })
+    ro.observe(area)
+    return () => ro.disconnect()
   }, [])
 
   const getPos = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
@@ -157,11 +185,9 @@ export function Paint() {
 
       <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
         {/* Canvas area */}
-        <div style={{ flex: 1, overflow: 'auto', background: '#808080', display: 'flex', alignItems: 'flex-start', justifyContent: 'flex-start', padding: 8 }}>
+        <div ref={areaRef} style={{ flex: 1, overflow: 'auto', background: '#808080', display: 'flex', alignItems: 'flex-start', justifyContent: 'flex-start', padding: 8 }}>
           <canvas
             ref={canvasRef}
-            width={620}
-            height={400}
             style={{ cursor: tool === 'fill' ? 'crosshair' : tool === 'eraser' ? 'cell' : 'crosshair', display: 'block', boxShadow: '2px 2px 6px rgba(0,0,0,0.5)' }}
             onMouseDown={onMouseDown}
             onMouseMove={onMouseMove}

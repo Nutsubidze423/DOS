@@ -140,9 +140,10 @@ export function Minesweeper() {
   const displayTime = Math.min(time, 999)
 
   return (
-    <div style={{ background: 'var(--color-chrome)', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: 12, userSelect: 'none' }}>
+    <div style={{ background: 'var(--color-chrome)', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'auto', userSelect: 'none' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: 12 }}>
       {/* Status bar */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', padding: '6px 8px', marginBottom: 10, border: '2px solid', borderColor: 'var(--color-bevel-dark) var(--color-bevel-light) var(--color-bevel-light) var(--color-bevel-dark)', background: 'var(--color-chrome)' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: COLS * 28 + 16, padding: '6px 8px', marginBottom: 10, border: '2px solid', borderColor: 'var(--color-bevel-dark) var(--color-bevel-light) var(--color-bevel-light) var(--color-bevel-dark)', background: 'var(--color-chrome)' }}>
         <SevenSeg value={minesLeft} />
         <button onClick={reset} style={{ width: 34, height: 30, fontSize: 18, cursor: 'pointer', background: 'var(--color-chrome)', border: '2px solid', borderColor: 'var(--color-bevel-light) var(--color-bevel-dark) var(--color-bevel-dark) var(--color-bevel-light)' }}>
           {FACE[phase]}
@@ -169,6 +170,7 @@ export function Minesweeper() {
           {phase === 'won' ? `You win! ${time}s` : 'Game over!'}
         </div>
       )}
+    </div>
     </div>
   )
 }

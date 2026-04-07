@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback, type CSSProperties } from 'react'
+import { useState, useCallback, useEffect, useRef, type CSSProperties } from 'react'
 
 type Suit = '♠' | '♥' | '♦' | '♣'
 interface Card { suit: Suit; value: number; faceUp: boolean; id: string }
@@ -93,10 +93,26 @@ const EmptyPile = ({ onClick, label }: { onClick?: () => void; label?: string })
   </div>
 )
 
+// Natural width of the game layout (7 piles * card + gaps)
+const GAME_W = 7 * CARD_W + 6 * 6 + 16
+
 export function Solitaire() {
   const [state, setState] = useState<State>(deal)
-  const [sel, setSel] = useState<Sel>(null)
-  const [won, setWon] = useState(false)
+  const [sel, setSel]     = useState<Sel>(null)
+  const [won, setWon]     = useState(false)
+  const [scale, setScale] = useState(1)
+  const outerRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const el = outerRef.current
+    if (!el) return
+    const ro = new ResizeObserver(() => {
+      const available = el.clientWidth - 8
+      setScale(Math.min(1, available / GAME_W))
+    })
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [])
 
   const checkWin = useCallback((s: State) => s.foundations.every(f => f.length === 13), [])
 
@@ -249,7 +265,8 @@ export function Solitaire() {
   const { stock, waste, foundations, tableau } = state
 
   return (
-    <div style={{ background: '#1a6b1a', height: '100%', overflow: 'auto', padding: 8, userSelect: 'none', position: 'relative' }}>
+    <div ref={outerRef} style={{ background: '#1a6b1a', height: '100%', overflow: 'auto', userSelect: 'none', position: 'relative' }}>
+    <div style={{ transformOrigin: 'top left', transform: `scale(${scale})`, width: GAME_W, padding: 8 }}>
       {won && (
         <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.7)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
           <div style={{ background: 'var(--color-chrome)', border: '3px solid', borderColor: 'var(--color-bevel-light) var(--color-bevel-dark) var(--color-bevel-dark) var(--color-bevel-light)', padding: 24, textAlign: 'center' }}>
@@ -326,6 +343,7 @@ export function Solitaire() {
       >
         New Game
       </button>
+    </div>
     </div>
   )
 }
