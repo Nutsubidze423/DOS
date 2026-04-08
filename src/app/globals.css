@@ -122,3 +122,16 @@ html {
   -webkit-user-select: none;
   user-select: none;
 }
+
+/* Win98 arrow cursor */
+*, *::before, *::after {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='13' height='21' viewBox='0 0 13 21'%3E%3Cpath d='M0 0 L0 17 L4 13 L7.5 20 L9.5 19 L6 12 L11 12 Z' fill='white'/%3E%3Cpath d='M1 2 L1 15 L4.5 11.5 L8 19 L8.5 18.7 L5 11.5 L10 11.5 Z' fill='black'/%3E%3C/svg%3E") 0 0, default !important;
+}
+
+a, button, [role="button"], input[type="button"], input[type="submit"], [style*="cursor: pointer"], .cursor-pointer {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='13' height='21' viewBox='0 0 13 21'%3E%3Cpath d='M0 0 L0 17 L4 13 L7.5 20 L9.5 19 L6 12 L11 12 Z' fill='white'/%3E%3Cpath d='M1 2 L1 15 L4.5 11.5 L8 19 L8.5 18.7 L5 11.5 L10 11.5 Z' fill='black'/%3E%3C/svg%3E") 0 0, pointer !important;
+}
+
+input[type="text"], input[type="number"], textarea, [contenteditable] {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='7' height='18' viewBox='0 0 7 18'%3E%3Cline x1='3.5' y1='0' x2='3.5' y2='18' stroke='black' stroke-width='1.5'/%3E%3Cline x1='0' y1='0' x2='7' y2='0' stroke='black' stroke-width='1.5'/%3E%3Cline x1='0' y1='18' x2='7' y2='18' stroke='black' stroke-width='1.5'/%3E%3C/svg%3E") 3 9, text !important;
+}

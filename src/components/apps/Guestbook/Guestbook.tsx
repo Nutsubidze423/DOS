@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import { useAchievementStore } from '@/store/achievementStore'
 
 const STORAGE_KEY = 'portfolioOS_guestbook'
 
@@ -16,6 +17,7 @@ export function Guestbook() {
   const [message, setMessage] = useState('')
   const [err, setErr]         = useState('')
   const listRef = useRef<HTMLDivElement>(null)
+  const { unlock } = useAchievementStore()
 
   useEffect(() => {
     try {
@@ -35,6 +37,7 @@ export function Guestbook() {
     const next = [...entries, entry]
     setEntries(next)
     localStorage.setItem(STORAGE_KEY, JSON.stringify(next))
+    unlock('guestbook')
     setName('')
     setMessage('')
     setErr('')

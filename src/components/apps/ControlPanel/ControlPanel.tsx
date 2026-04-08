@@ -2,6 +2,7 @@
 
 import { useDesktopStore, WallpaperMode, ScreensaverMode } from '@/store/desktopStore'
 import { useSoundStore } from '@/store/soundStore'
+import { useAchievementStore } from '@/store/achievementStore'
 
 const WALLPAPERS: { id: WallpaperMode; label: string; preview: string }[] = [
   { id: 'teal', label: 'Classic Teal', preview: '#008080' },
@@ -19,6 +20,7 @@ const SCREENSAVERS: { id: ScreensaverMode; label: string; icon: string }[] = [
 export function ControlPanel() {
   const { wallpaper, setWallpaper, crtEnabled, toggleCRT, screensaverMode, setScreensaverMode } = useDesktopStore()
   const { muted, toggleMute } = useSoundStore()
+  const { unlock } = useAchievementStore()
 
   return (
     <div className="flex flex-col h-full bg-os-chrome overflow-hidden">
@@ -38,7 +40,7 @@ export function ControlPanel() {
             {WALLPAPERS.map(w => (
               <button
                 key={w.id}
-                onClick={() => setWallpaper(w.id)}
+                onClick={() => { setWallpaper(w.id); unlock('wallpaper') }}
                 className="flex flex-col items-center gap-1 p-1"
                 style={{
                   border: '2px solid',

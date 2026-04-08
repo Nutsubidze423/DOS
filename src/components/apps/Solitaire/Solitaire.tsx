@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useEffect, useRef, type CSSProperties } from 'react'
 import { createPortal } from 'react-dom'
+import { useAchievementStore } from '@/store/achievementStore'
 
 type Suit = '♠' | '♥' | '♦' | '♣'
 interface Card { suit: Suit; value: number; faceUp: boolean; id: string }
@@ -186,6 +187,7 @@ export function Solitaire() {
   const [won, setWon]     = useState(false)
   const [scale, setScale] = useState(1)
   const outerRef  = useRef<HTMLDivElement>(null)
+  const { unlock } = useAchievementStore()
 
   // Drag — kept in a ref for non-stale global handlers; mirrored in state for renders
   const dragRef   = useRef<DragState | null>(null)
@@ -202,6 +204,11 @@ export function Solitaire() {
     ro.observe(el)
     return () => ro.disconnect()
   }, [])
+
+  useEffect(() => {
+    if (won) unlock('solitaire-win')
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [won])
 
   const checkWin = useCallback((s: State) => s.foundations.every(f => f.length === 13), [])
 

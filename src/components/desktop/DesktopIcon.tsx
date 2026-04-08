@@ -70,6 +70,7 @@ export function DesktopIcon({ config }: DesktopIconProps) {
 
   return (
     <motion.button
+      data-desktop-icon="true"
       className="flex flex-col items-center gap-1 w-[90px] py-2 px-1 rounded cursor-pointer border border-transparent focus:outline-none"
       style={{
         background: selected ? 'rgba(0,0,128,0.5)' : 'transparent',

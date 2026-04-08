@@ -13,8 +13,12 @@ import { Clippy } from './Clippy'
 import { BSOD } from './BSOD'
 import { initSounds } from '@/lib/sounds'
 import { ToastContainer } from './ToastContainer'
+import { AchievementPopup } from './AchievementPopup'
+import { RunDialog } from './RunDialog'
 import { useToastStore } from '@/store/toastStore'
 import { useWindowStore } from '@/store/windowStore'
+import { useDesktopStore } from '@/store/desktopStore'
+import { useAchievementStore } from '@/store/achievementStore'
 
 const KONAMI = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a']
 
@@ -24,6 +28,8 @@ export function Desktop() {
   const konamiRef = useRef<string[]>([])
   const { addToast } = useToastStore()
   const { windows, closeWindow, minimizeWindow } = useWindowStore()
+  const { unlock } = useAchievementStore()
+  const { showRun, setShowRun } = useDesktopStore()
 
   // Prime the audio context on first render so sounds work immediately
   useEffect(() => {
@@ -36,6 +42,7 @@ export function Desktop() {
       konamiRef.current = [...konamiRef.current, e.key].slice(-10)
       if (konamiRef.current.join(',') === KONAMI.join(',')) {
         addToast('CRITICAL ERROR: System instability detected...', 'warning')
+        unlock('konami')
         setTimeout(() => setShowBsod(true), 800)
         konamiRef.current = []
       }
@@ -71,6 +78,11 @@ export function Desktop() {
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
   }, [windows, closeWindow, minimizeWindow])
+
+  useEffect(() => {
+    if (Object.keys(windows).length >= 6) unlock('explorer')
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [Object.keys(windows).length])
 
   const handleContextMenu = useCallback((e: React.MouseEvent) => {
     e.preventDefault()
@@ -110,8 +122,10 @@ export function Desktop() {
       <Screensaver />
       <MultiplayerCursors />
       <ToastContainer />
+      <AchievementPopup />
       <Clippy />
       {showBsod && <BSOD onDismiss={() => setShowBsod(false)} />}
+      {showRun && <RunDialog onClose={() => setShowRun(false)} />}
     </div>
   )
 }

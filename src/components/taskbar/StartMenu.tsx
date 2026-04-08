@@ -4,6 +4,7 @@ import { useCallback, useState } from 'react'
 import { motion } from 'framer-motion'
 import { useWindowStore } from '@/store/windowStore'
 import { useBootStore } from '@/store/bootStore'
+import { useDesktopStore } from '@/store/desktopStore'
 import { AppId } from '@/types'
 
 interface StartMenuItem {
@@ -40,6 +41,7 @@ interface StartMenuProps {
 export function StartMenu({ onClose }: StartMenuProps) {
   const { openWindow, resetAll } = useWindowStore()
   const { powerOff } = useBootStore()
+  const { setShowRun } = useDesktopStore()
   const [search, setSearch] = useState('')
   const filtered = search.trim()
     ? MENU_ITEMS.filter(item => item.label.toLowerCase().includes(search.toLowerCase()))
@@ -124,6 +126,14 @@ export function StartMenu({ onClose }: StartMenuProps) {
               </button>
             ))
           }
+
+          <button
+            className="w-full flex items-center gap-3 px-3 py-[8px] font-ui text-[14px] text-black hover:bg-[#000080] hover:text-white text-left"
+            onClick={() => { setShowRun(true); onClose() }}
+          >
+            <span className="text-[20px] w-6 text-center">▶</span>
+            Run...
+          </button>
 
           {/* Divider */}
           <div className="border-t border-os-chrome-dark mx-2 my-1" />
