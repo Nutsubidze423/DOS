@@ -28,6 +28,9 @@ const AppComponents: Record<AppId, React.LazyExoticComponent<AppComponent>> = {
   'minesweeper':  lazy(() => import('@/components/apps/Minesweeper/Minesweeper').then(m => ({ default: m.Minesweeper }))),
   'paint':        lazy(() => import('@/components/apps/Paint/Paint').then(m => ({ default: m.Paint }))),
   'defrag':       lazy(() => import('@/components/apps/Defrag/Defrag').then(m => ({ default: m.Defrag }))),
+  'calculator':   lazy(() => import('@/components/apps/Calculator/Calculator').then(m => ({ default: m.Calculator }))),
+  'notepad':      lazy(() => import('@/components/apps/Notepad/Notepad').then(m => ({ default: m.Notepad }))),
+  'guestbook':    lazy(() => import('@/components/apps/Guestbook/Guestbook').then(m => ({ default: m.Guestbook }))),
 }
 
 const DIRECTIONS = ['n', 'ne', 'e', 'se', 's', 'sw', 'w', 'nw'] as const

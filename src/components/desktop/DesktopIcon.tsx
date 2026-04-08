@@ -22,6 +22,9 @@ const ICON_MAP: Record<AppId, string> = {
   'minesweeper': '💣',
   'paint': '🎨',
   'defrag': '💾',
+  'calculator': '🔢',
+  'notepad': '📓',
+  'guestbook': '📖',
 }
 
 export const DESKTOP_ICONS: DesktopIconConfig[] = [
@@ -40,6 +43,9 @@ export const DESKTOP_ICONS: DesktopIconConfig[] = [
   { appId: 'music-player', label: 'Spotify', icon: ICON_MAP['music-player'] },
   { appId: 'defrag', label: 'Defrag', icon: ICON_MAP['defrag'] },
   { appId: 'control-panel', label: 'Control Panel', icon: ICON_MAP['control-panel'] },
+  { appId: 'calculator', label: 'Calculator', icon: ICON_MAP['calculator'] },
+  { appId: 'notepad', label: 'Notepad', icon: ICON_MAP['notepad'] },
+  { appId: 'guestbook', label: 'Guestbook', icon: ICON_MAP['guestbook'] },
   { appId: 'recycle-bin', label: 'Recycle Bin', icon: ICON_MAP['recycle-bin'] },
 ]
 

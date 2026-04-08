@@ -462,11 +462,21 @@ export function Solitaire() {
     <div
       ref={outerRef}
       style={{
-        background: '#1a6b1a', height: '100%', overflow: 'auto',
+        background: '#1a6b1a', height: '100%', display: 'flex', flexDirection: 'column',
         userSelect: 'none', position: 'relative',
         cursor: drag?.moved ? 'grabbing' : undefined,
       }}
     >
+      {/* Toolbar — lives outside the scale transform */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', padding: '4px 8px', flexShrink: 0, background: 'rgba(0,0,0,0.15)' }}>
+        <button
+          onClick={newGame}
+          style={{ fontFamily: 'monospace', fontSize: 11, padding: '3px 10px', background: 'var(--color-chrome)', border: '2px solid', borderColor: 'var(--color-bevel-light) var(--color-bevel-dark) var(--color-bevel-dark) var(--color-bevel-light)', cursor: 'pointer' }}
+        >
+          New Game
+        </button>
+      </div>
+      <div style={{ flex: 1, overflow: 'auto' }}>
       <div style={{ transformOrigin: 'top left', transform: `scale(${scale})`, width: GAME_W, padding: 8 }}>
 
         {/* Top row */}
@@ -536,15 +546,7 @@ export function Solitaire() {
           ))}
         </div>
 
-        {/* New Game — in-flow, not fixed */}
-        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 12, paddingBottom: 8 }}>
-          <button
-            onClick={newGame}
-            style={{ fontFamily: 'monospace', fontSize: 11, padding: '3px 10px', background: 'var(--color-chrome)', border: '2px solid', borderColor: 'var(--color-bevel-light) var(--color-bevel-dark) var(--color-bevel-dark) var(--color-bevel-light)', cursor: 'pointer' }}
-          >
-            New Game
-          </button>
-        </div>
+      </div>
       </div>
 
       {/* Portals — escape the Window's transform context */}

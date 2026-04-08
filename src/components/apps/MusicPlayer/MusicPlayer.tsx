@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 
 interface Track { title: string; artist: string; src: string; hue: number }
 
@@ -20,6 +20,26 @@ const fmt = (s: number) =>
 // Lives outside React — survives component unmount (window minimize).
 // All React instances share the same audio element and read the same state.
 let _el: HTMLAudioElement | null = null
+let _audioCtx: AudioContext | null = null
+let _analyser: AnalyserNode | null = null
+let _sourceConnected = false
+
+function initWebAudio() {
+  if (!_el) return
+  if (!_audioCtx) {
+    _audioCtx = new AudioContext()
+    _analyser = _audioCtx.createAnalyser()
+    _analyser.fftSize = 64
+    _analyser.smoothingTimeConstant = 0.8
+  }
+  if (!_sourceConnected) {
+    const src = _audioCtx.createMediaElementSource(_el)
+    src.connect(_analyser!)
+    _analyser!.connect(_audioCtx.destination)
+    _sourceConnected = true
+  }
+  if (_audioCtx.state === 'suspended') _audioCtx.resume().catch(() => {})
+}
 let _idx     = 0
 let _playing = false
 let _volume  = 0.7
@@ -53,6 +73,7 @@ function getAudio(): HTMLAudioElement {
 export function MusicPlayer() {
   const [, setTick] = useState(0)
   const rerender = useCallback(() => setTick(t => t + 1), [])
+  const canvasRef = useRef<HTMLCanvasElement>(null)
 
   useEffect(() => {
     _subs.add(rerender)
@@ -60,8 +81,36 @@ export function MusicPlayer() {
     return () => { _subs.delete(rerender) }
   }, [rerender])
 
+  // Visualizer RAF loop — reads _analyser each frame, clears when not playing
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+    let raf: number
+    const draw = () => {
+      raf = requestAnimationFrame(draw)
+      const W = canvas.width, H = canvas.height
+      ctx.clearRect(0, 0, W, H)
+      if (!_analyser || !_playing) return
+      const data = new Uint8Array(_analyser.frequencyBinCount)
+      _analyser.getByteFrequencyData(data)
+      const n = data.length
+      const bw = W / n
+      for (let i = 0; i < n; i++) {
+        const ratio = data[i] / 255
+        const h = ratio * H
+        ctx.fillStyle = `hsl(141, ${50 + ratio * 30}%, ${35 + ratio * 20}%)`
+        ctx.fillRect(i * bw, H - h, Math.max(1, bw - 1), h)
+      }
+    }
+    draw()
+    return () => cancelAnimationFrame(raf)
+  }, [])
+
   const togglePlay = useCallback(() => {
     const a = getAudio()
+    initWebAudio()
     if (_playing) { a.pause(); _playing = false; _notify() }
     else { a.play().then(() => { _playing = true; _notify() }).catch(() => {}) }
   }, [])
@@ -114,6 +163,11 @@ export function MusicPlayer() {
             <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: 24, height: 24, borderRadius: '50%', background: `hsl(${hue},55%,35%)`, boxShadow: '0 0 0 3px #111' }} />
           </div>
         </div>
+      </div>
+
+      {/* Visualizer */}
+      <div style={{ margin: '8px 14px 0', height: 44, background: '#000', borderRadius: 4, overflow: 'hidden', flexShrink: 0 }}>
+        <canvas ref={canvasRef} width={297} height={44} style={{ display: 'block', width: '100%', height: '100%' }} />
       </div>
 
       {/* Track info */}

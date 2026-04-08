@@ -3,6 +3,7 @@
 import { useState, useCallback, useEffect } from 'react'
 import { AnimatePresence } from 'framer-motion'
 import { useWindowStore } from '@/store/windowStore'
+import { usePresenceStore } from '@/store/presenceStore'
 import { StartButton } from './StartButton'
 import { TaskbarApp } from './TaskbarApp'
 import { SystemTray } from './SystemTray'
@@ -10,6 +11,7 @@ import { StartMenu } from './StartMenu'
 
 export function Taskbar() {
   const { windows } = useWindowStore()
+  const onlineCount = usePresenceStore(s => s.onlineCount)
   const [startMenuOpen, setStartMenuOpen] = useState(false)
 
   const toggleMenu = useCallback(() => setStartMenuOpen((prev) => !prev), [])
@@ -62,6 +64,16 @@ export function Taskbar() {
           />
         ))}
       </div>
+
+      {onlineCount > 1 && (
+        <div
+          className="flex items-center gap-1 px-2 font-ui text-[11px] shrink-0 select-none"
+          style={{ color: '#006400', whiteSpace: 'nowrap', borderRight: '1px solid var(--color-bevel-dark)' }}
+          title={`${onlineCount} visitors online`}
+        >
+          🟢 {onlineCount}
+        </div>
+      )}
 
       <SystemTray />
 

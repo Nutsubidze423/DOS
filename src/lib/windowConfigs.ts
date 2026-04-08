@@ -83,4 +83,19 @@ export const WINDOW_CONFIGS: Record<AppId, WindowDefaults> = {
     size: { width: 560, height: 440 },
     position: { x: 160, y: 80 },
   },
+  'calculator': {
+    title: 'Calculator',
+    size: { width: 240, height: 320 },
+    position: { x: 350, y: 120 },
+  },
+  'notepad': {
+    title: 'Notepad',
+    size: { width: 550, height: 450 },
+    position: { x: 180, y: 90 },
+  },
+  'guestbook': {
+    title: 'Guestbook',
+    size: { width: 480, height: 520 },
+    position: { x: 200, y: 70 },
+  },
 }

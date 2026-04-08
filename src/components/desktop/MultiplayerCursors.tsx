@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { usePresenceStore } from '@/store/presenceStore'
 
 interface RemoteCursor { x: number; y: number; color: string; id: string }
 
@@ -14,7 +15,10 @@ export function MultiplayerCursors() {
   const myIdRef       = useRef<string>(Math.random().toString(36).slice(2, 9))
   const myColor       = useRef(CURSOR_COLORS[Math.floor(Math.random() * CURSOR_COLORS.length)])
   const timeouts      = useRef<Record<string, ReturnType<typeof setTimeout>>>({})
+  const countRef      = useRef(0)
+  const { setOnlineCount } = usePresenceStore()
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (!PUSHER_KEY || !PUSHER_CLUSTER) return
 
@@ -33,8 +37,20 @@ export function MultiplayerCursors() {
       const ch = pusher.subscribe('presence-cursors') as any
       channelRef.current = ch
 
-      ch.bind('pusher:subscription_succeeded', () => {
+      ch.bind('pusher:subscription_succeeded', (data: { count?: number }) => {
         subscribedRef.current = true
+        countRef.current = data?.count ?? 1
+        setOnlineCount(countRef.current)
+      })
+
+      ch.bind('pusher:member_added', () => {
+        countRef.current++
+        setOnlineCount(countRef.current)
+      })
+
+      ch.bind('pusher:member_removed', () => {
+        countRef.current = Math.max(0, countRef.current - 1)
+        setOnlineCount(countRef.current)
       })
 
       ch.bind('pusher:subscription_error', (err: unknown) => {

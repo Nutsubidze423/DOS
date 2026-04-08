@@ -15,6 +15,9 @@ export type AppId =
   | 'minesweeper'
   | 'paint'
   | 'defrag'
+  | 'calculator'
+  | 'notepad'
+  | 'guestbook'
 
 export interface WindowState {
   id: string

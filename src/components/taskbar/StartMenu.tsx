@@ -27,6 +27,9 @@ const MENU_ITEMS: StartMenuItem[] = [
   { label: 'Paint', appId: 'paint', icon: '🎨' },
   { label: 'Defrag', appId: 'defrag', icon: '💾' },
   { label: 'Control Panel', appId: 'control-panel', icon: '🎛️' },
+  { label: 'Calculator', appId: 'calculator', icon: '🔢' },
+  { label: 'Notepad', appId: 'notepad', icon: '📓' },
+  { label: 'Guestbook', appId: 'guestbook', icon: '📖' },
   { label: 'Contact', appId: 'contact', icon: '✉️' },
 ]
 
