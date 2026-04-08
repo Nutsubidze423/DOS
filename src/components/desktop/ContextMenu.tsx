@@ -2,12 +2,7 @@
 
 import { useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
-
-interface MenuItem {
-  label: string
-  action: () => void
-  divider?: boolean
-}
+import { useWindowStore } from '@/store/windowStore'
 
 interface ContextMenuProps {
   x: number
@@ -17,6 +12,7 @@ interface ContextMenuProps {
 
 export function ContextMenu({ x, y, onClose }: ContextMenuProps) {
   const menuRef = useRef<HTMLDivElement>(null)
+  const { openWindow } = useWindowStore()
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -28,40 +24,63 @@ export function ContextMenu({ x, y, onClose }: ContextMenuProps) {
     return () => document.removeEventListener('mousedown', handler)
   }, [onClose])
 
+  const safeX = Math.min(x, window.innerWidth - 200)
+  const safeY = Math.min(y, window.innerHeight - 200)
+
+  interface MenuItem { label: string; action: () => void; divider?: boolean; disabled?: boolean }
+
   const items: MenuItem[] = [
-    { label: 'Refresh', action: onClose },
-    { label: 'View', action: onClose, divider: true },
     {
-      label: 'Properties', action: () => {
-        alert('Demetre Nutsubidze — Front End Developer\nBuilt with Next.js + Framer Motion\nVersion 1.0.0')
+      label: 'Refresh',
+      action: () => {
+        document.querySelectorAll('[data-desktop-icon]').forEach(el => {
+          (el as HTMLElement).style.opacity = '0.4'
+          setTimeout(() => (el as HTMLElement).style.opacity = '1', 300)
+        })
         onClose()
-      }
+      },
+    },
+    { label: 'Arrange Icons', action: onClose },
+    { label: '─────────────', action: onClose, disabled: true, divider: true },
+    { label: '📓 New Notepad', action: () => { openWindow('notepad'); onClose() } },
+    { label: '🔢 New Calculator', action: () => { openWindow('calculator'); onClose() } },
+    { label: '─────────────', action: onClose, disabled: true, divider: true },
+    { label: '🎛️ Control Panel', action: () => { openWindow('control-panel'); onClose() } },
+    {
+      label: 'Properties',
+      action: () => {
+        openWindow('about-me')
+        onClose()
+      },
     },
   ]
-
-  // Clamp to viewport
-  const safeX = Math.min(x, window.innerWidth - 160)
-  const safeY = Math.min(y, window.innerHeight - 120)
 
   return (
     <motion.div
       ref={menuRef}
-      className="fixed z-[9990] bg-os-chrome bevel-raised py-[2px] min-w-[160px] shadow-lg"
-      style={{ left: safeX, top: safeY }}
+      className="fixed z-[9990] bg-os-chrome py-[2px] min-w-[180px]"
+      style={{
+        left: safeX, top: safeY,
+        border: '2px solid',
+        borderColor: 'var(--color-bevel-light) var(--color-bevel-dark) var(--color-bevel-dark) var(--color-bevel-light)',
+        boxShadow: '3px 3px 8px rgba(0,0,0,0.4)',
+      }}
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ type: 'spring', stiffness: 400, damping: 25, duration: 0.15 }}
     >
       {items.map((item, i) => (
-        <div key={i}>
-          {item.divider && <div className="border-t border-os-chrome-dark mx-1 my-[2px]" />}
-          <button
-            className="w-full text-left px-4 py-[3px] font-ui text-[12px] text-black hover:bg-[#000080] hover:text-white"
-            onClick={item.action}
-          >
-            {item.label}
-          </button>
-        </div>
+        item.disabled
+          ? <div key={i} className="mx-2 my-[2px] border-t border-[#808080]" />
+          : (
+            <button
+              key={i}
+              className="w-full text-left px-3 py-[4px] font-ui text-[12px] text-black hover:bg-[#000080] hover:text-white"
+              onClick={item.action}
+            >
+              {item.label}
+            </button>
+          )
       ))}
     </motion.div>
   )

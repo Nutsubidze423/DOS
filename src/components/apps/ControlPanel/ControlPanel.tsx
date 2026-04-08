@@ -1,6 +1,6 @@
 'use client'
 
-import { useDesktopStore, WallpaperMode } from '@/store/desktopStore'
+import { useDesktopStore, WallpaperMode, ScreensaverMode } from '@/store/desktopStore'
 import { useSoundStore } from '@/store/soundStore'
 
 const WALLPAPERS: { id: WallpaperMode; label: string; preview: string }[] = [
@@ -11,8 +11,13 @@ const WALLPAPERS: { id: WallpaperMode; label: string; preview: string }[] = [
   { id: 'dark', label: 'Midnight', preview: '#111118' },
 ]
 
+const SCREENSAVERS: { id: ScreensaverMode; label: string; icon: string }[] = [
+  { id: 'starfield', label: 'Starfield', icon: '✨' },
+  { id: 'matrix', label: 'Matrix Rain', icon: '💚' },
+]
+
 export function ControlPanel() {
-  const { wallpaper, setWallpaper, crtEnabled, toggleCRT } = useDesktopStore()
+  const { wallpaper, setWallpaper, crtEnabled, toggleCRT, screensaverMode, setScreensaverMode } = useDesktopStore()
   const { muted, toggleMute } = useSoundStore()
 
   return (
@@ -84,6 +89,37 @@ export function ControlPanel() {
             />
             <span className="font-ui text-[12px] text-black">Enable system sounds</span>
           </label>
+        </div>
+
+        {/* Screensaver */}
+        <div>
+          <div className="font-ui text-[13px] font-bold text-black mb-2 pb-1" style={{ borderBottom: '1px solid var(--color-bevel-dark)' }}>
+            🖥️ Screen Saver
+          </div>
+          <div className="flex gap-3">
+            {SCREENSAVERS.map(s => (
+              <button
+                key={s.id}
+                onClick={() => setScreensaverMode(s.id)}
+                className="flex flex-col items-center gap-1 p-2"
+                style={{
+                  border: '2px solid',
+                  borderColor: screensaverMode === s.id
+                    ? 'var(--color-title-from)'
+                    : 'var(--color-bevel-light) var(--color-bevel-dark) var(--color-bevel-dark) var(--color-bevel-light)',
+                  background: screensaverMode === s.id ? 'rgba(0,0,128,0.1)' : 'transparent',
+                  minWidth: 70,
+                }}
+              >
+                <div className="w-[48px] h-[32px] flex items-center justify-center text-[20px]"
+                  style={{ background: '#000', border: '1px solid #808080' }}>
+                  {s.icon}
+                </div>
+                <span className="font-ui text-[10px] text-black">{s.label}</span>
+              </button>
+            ))}
+          </div>
+          <div className="font-ui text-[10px] text-gray-500 mt-1">Activates after 45 seconds of inactivity</div>
         </div>
 
         {/* About */}

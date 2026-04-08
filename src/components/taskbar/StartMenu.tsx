@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback } from 'react'
+import { useCallback, useState } from 'react'
 import { motion } from 'framer-motion'
 import { useWindowStore } from '@/store/windowStore'
 import { useBootStore } from '@/store/bootStore'
@@ -40,6 +40,10 @@ interface StartMenuProps {
 export function StartMenu({ onClose }: StartMenuProps) {
   const { openWindow, resetAll } = useWindowStore()
   const { powerOff } = useBootStore()
+  const [search, setSearch] = useState('')
+  const filtered = search.trim()
+    ? MENU_ITEMS.filter(item => item.label.toLowerCase().includes(search.toLowerCase()))
+    : MENU_ITEMS
 
   const handleItem = useCallback(
     (item: StartMenuItem) => {
@@ -82,17 +86,44 @@ export function StartMenu({ onClose }: StartMenuProps) {
             Demetre Nutsubidze
           </div>
 
+          {/* Search */}
+          <div style={{ padding: '4px 8px', borderBottom: '1px solid var(--color-bevel-dark)' }}>
+            <input
+              autoFocus
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              onKeyDown={e => {
+                if (e.key === 'Enter' && filtered.length === 1 && filtered[0].appId) {
+                  openWindow(filtered[0].appId)
+                  onClose()
+                }
+                if (e.key === 'Escape') onClose()
+              }}
+              placeholder="Search programs..."
+              style={{
+                width: '100%', padding: '2px 6px',
+                fontFamily: 'monospace', fontSize: 11,
+                border: '2px solid',
+                borderColor: 'var(--color-bevel-dark) var(--color-bevel-light) var(--color-bevel-light) var(--color-bevel-dark)',
+                background: '#fff', outline: 'none',
+              }}
+            />
+          </div>
+
           {/* Items */}
-          {MENU_ITEMS.map((item) => (
-            <button
-              key={item.label}
-              className="w-full flex items-center gap-3 px-3 py-[8px] font-ui text-[14px] text-black hover:bg-[#000080] hover:text-white text-left"
-              onClick={() => handleItem(item)}
-            >
-              <span className="text-[20px] w-6 text-center">{item.icon}</span>
-              {item.label}
-            </button>
-          ))}
+          {filtered.length === 0
+            ? <div className="px-4 py-3 font-ui text-[12px] text-gray-500">No results for &quot;{search}&quot;</div>
+            : filtered.map((item) => (
+              <button
+                key={item.label}
+                className="w-full flex items-center gap-3 px-3 py-[8px] font-ui text-[14px] text-black hover:bg-[#000080] hover:text-white text-left"
+                onClick={() => handleItem(item)}
+              >
+                <span className="text-[20px] w-6 text-center">{item.icon}</span>
+                {item.label}
+              </button>
+            ))
+          }
 
           {/* Divider */}
           <div className="border-t border-os-chrome-dark mx-2 my-1" />
